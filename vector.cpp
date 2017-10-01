@@ -1,6 +1,6 @@
 #include<initializer_list>//值列表类
 #include<memory>//allocator类	
-
+#include<stdexcept>//其中定义了几种常见的异常类
 
 
 class vector
@@ -176,5 +176,37 @@ public:
 			alloc.destroy(p);
 		}
 	}
+
+	//元素访问
+	value_type& front()
+	{
+		return *elem;
+	}
+
+	value_type& back()
+	{
+		return *(space - 1);
+	}
+
+	value_type& operator[](int n)//这里没有将参数限制为无符号数，是想提供无边界检查的访问
+	{
+		return *(elem + n);
+	}
+
+	value_type& at(int n)
+	{
+		if (n<0 || n>(space - elem))
+			throw std::out_of_range("vector out of range");
+		else
+			return *(elem + n);
+	}
+
+	//栈操作
+
+	void push_back(value_type v)
+	{
+
+	}
+
 
 };
