@@ -205,8 +205,57 @@ public:
 
 	void push_back(value_type v)
 	{
+		
+	}
+
+	void pop_back()
+	{
 
 	}
+
+	void emplace_back()//args
+	{
+
+	}
+
+	//ÁÐ±í²Ù×÷
+
+	iterator insert(iterator p, int x)
+	{
+
+	}
+
+	iterator insert(iterator p, int n, int x)
+	{
+
+	}
+
+	iterator insert(iterator p, void * first, void * last)
+	{
+
+	}
+
+	iterator insert(iterator p, std::initializer_list<int> li)
+	{
+
+	}
+
+	iterator earse(iterator p)
+	{
+
+	}
+
+	iterator earse(iterator first, iterator last)
+	{
+
+	}
+
+	void clear()
+	{
+
+	}
+
+
 
 
 };
