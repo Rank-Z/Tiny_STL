@@ -255,7 +255,23 @@ public:
 
 	}
 
+	//比较与交换
 
+	bool operator==(vector& v);
+
+	bool operator!=(vector& v);
+
+	bool operator<(vector& v);
+
+	bool operator<=(vector& v);
+
+	bool operator>(vector& v);
+
+	bool operator>=(vector& v);
+
+	void swap(vector& v);
+
+	friend void swap(vector&v1, vector&v2);
 
 
 };
