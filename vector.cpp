@@ -50,7 +50,7 @@ public:
 		}
 	}
 
-	vector(std::initializer_list<int> &il) :vector(il.begin(),il.end())//值列表 返回const指针
+	vector(std::initializer_list<int> &il) :vector(il.begin(),il.end())//值列表 只返回const指针
 	{ }
 
 	vector(vector& v):vector(v.cbegin(),v.cend())
@@ -70,7 +70,8 @@ public:
 	//功能函数
 
 
-	//迭代器和指针
+	//迭代器和指针********************************************************************************
+
 	iterator begin()
 	{
 		return elem;
@@ -92,7 +93,8 @@ public:
 	}
 	//TODO:反序迭代器
 
-	//大小和容量
+	//大小和容量*************************************************************************************
+
 	size_type size()
 	{
 		return static_cast<unsigned>(space - elem);
@@ -115,6 +117,11 @@ public:
 		{
 			*(p + i) = *(elem + i);
 		}
+		for (iterator it = elem; it != space; ++it)
+		{
+			alloc.destroy(it);//析构容器中每个元素
+		}
+		alloc.deallocate(elem, (last - elem));
 		space = p + (space - elem);
 		last = p + (space - elem);
 		elem = p;
@@ -177,7 +184,8 @@ public:
 		}
 	}
 
-	//元素访问
+	//元素访问**************************************************************************************
+
 	value_type& front()
 	{
 		return *elem;
@@ -201,11 +209,16 @@ public:
 			return *(elem + n);
 	}
 
-	//栈操作
+	//栈操作*****************************************************************************************
 
 	void push_back(value_type v)
 	{
-		
+		if (!(last - space))
+		{
+			reserve(last - elem);
+		}
+		*space = v;
+		--space;
 	}
 
 	void pop_back()
@@ -218,7 +231,7 @@ public:
 
 	}
 
-	//列表操作
+	//列表操作*********************************************************************************************
 
 	iterator insert(iterator p, int x)
 	{
@@ -255,21 +268,42 @@ public:
 
 	}
 
-	//比较与交换
+	//比较与交换*********************************************************************************
 
-	bool operator==(vector& v);
+	bool operator==(vector& v)
+	{
 
-	bool operator!=(vector& v);
+	}
 
-	bool operator<(vector& v);
+	bool operator!=(vector& v)
+	{
 
-	bool operator<=(vector& v);
+	}
 
-	bool operator>(vector& v);
+	bool operator<(vector& v)
+	{
 
-	bool operator>=(vector& v);
+	}
 
-	void swap(vector& v);
+	bool operator<=(vector& v)
+	{
+
+	}
+
+	bool operator>(vector& v)
+	{
+
+	}
+
+	bool operator>=(vector& v)
+	{
+
+	}
+
+	void swap(vector& v)
+	{
+
+	}
 
 	friend void swap(vector&v1, vector&v2);
 
