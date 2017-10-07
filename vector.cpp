@@ -215,32 +215,47 @@ public:
 	{
 		if (!(last - space))
 		{
-			reserve(last - elem);
+			reserve(last - elem);//扩容为原来大小的两倍，C++标准中并没有对此有明确规定，但是大部分C++实现都是如此
 		}
 		*space = v;
-		--space;
+		++space;
 	}
 
 	void pop_back()
 	{
-
+		alloc.destroy(space);
+		--space;
 	}
 
-	void emplace_back()//args
+	void emplace_back()//args,TODO:泛型编程
 	{
 
 	}
 
 	//列表操作*********************************************************************************************
 
-	iterator insert(iterator p, int x)
+	iterator insert(iterator p, value_type x)
 	{
-
+		insert(p, 1, std::forward<value_type>(x));
 	}
 
-	iterator insert(iterator p, int n, int x)
+	iterator insert(iterator p, int n, value_type x)//要求可使用拷贝或移动
 	{
-
+		difference_type dif = space - p;
+		value_type* tp =alloc.allocate(dif);
+		for (int i = 0; i != dif; ++i)
+		{
+			*(tp + i) = *(p + i);
+			alloc.destroy(p + i);
+		}
+		alloc.construct(p, std::move(x));
+		++p;
+		for (int i = 0; i != dif; ++i)
+		{
+			alloc.construct(p + i, std::move(*(tp + i)));
+			alloc.destroy(tp + i);
+		}
+		alloc.deallocate(tp, dif);
 	}
 
 	iterator insert(iterator p, void * first, void * last)
