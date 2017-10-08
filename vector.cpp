@@ -1,7 +1,7 @@
 #include<initializer_list>//值列表类
 #include<memory>//allocator类	
 #include<stdexcept>//其中定义了几种常见的异常类
-
+#include<utility>//std::move() std::forward()
 
 class vector
 {
@@ -16,8 +16,8 @@ class vector
 	using allocator_type = std::allocator<int>;
 
 private:
-	int *elem = nullptr;//头		beign()
-	int *space = nullptr;//未使用空间首地址	end()
+	int *elem = nullptr;//首地址				==beign()
+	int *space = nullptr;//未使用空间首地址	==end()
 	int *last = nullptr;//总共地址尾后地址
 	allocator_type alloc;//内存管理对象
 
@@ -117,7 +117,7 @@ public:
 		{
 			*(p + i) = *(elem + i);
 		}
-		for (iterator it = elem; it != space; ++it)
+		for (auto it = elem; it != space; ++it)
 		{
 			alloc.destroy(it);//析构容器中每个元素
 		}
@@ -234,53 +234,161 @@ public:
 
 	//列表操作*********************************************************************************************
 
-	iterator insert(iterator p, value_type x)
+	iterator insert(iterator position, value_type &&v)//可以使用移动操作
 	{
-		insert(p, 1, std::forward<value_type>(x));
-	}
-
-	iterator insert(iterator p, int n, value_type x)//要求可使用拷贝或移动
-	{
-		difference_type dif = space - p;
-		value_type* tp =alloc.allocate(dif);
-		for (int i = 0; i != dif; ++i)
+		if (last - space)
 		{
-			*(tp + i) = *(p + i);
-			alloc.destroy(p + i);
+			auto p = space - 1;
+			for (; p >= position; --p)
+			{
+				alloc.construct(p + 1, *p);
+				alloc.destroy(p);
+			}
+			alloc.construct(position, std::move(v));
+			last++;
+			return position;
 		}
-		alloc.construct(p, std::move(x));
-		++p;
-		for (int i = 0; i != dif; ++i)
+		else
 		{
-			alloc.construct(p + i, std::move(*(tp + i)));
-			alloc.destroy(tp + i);
+			auto p = alloc.allocate(2 * (last - elem));
+			int dif = position - elem;
+			for (int i = 0; i!=dif; ++i)
+			{
+				alloc.construct(p + i, *(elem + i));
+				alloc.destroy(elem + i);
+			}
+			alloc.construct(p + (position - elem), std::forward<value_type>(v));
+			for (; position != space; ++position)
+			{
+				alloc.construct(p + 1 + (position - elem), *(position));
+				alloc.destroy(position);
+			}
+			alloc.deallocate(elem, last - elem);
+			last = p + 2 * (last - elem);
+			space = p + 1 + (space - elem);
+			elem = p;
+			return p + dif;
 		}
-		alloc.deallocate(tp, dif);
 	}
 
-	iterator insert(iterator p, void * first, void * last)
+	iterator insert(iterator position, int n, value_type v)//不能使用移动，不能对同一对象移动两次，这里要求类型允许拷贝
 	{
-
+		if (last - space >= n)
+		{
+			auto p = space - 1;
+			for ( ; p >=position; --p)
+			{
+				alloc.construct(p + n, *p);
+				alloc.destroy(p);
+			}
+			for (int i = 0; i != n; ++n)
+			{
+				alloc.construct(position+i, v);
+			}
+			last += n;
+			return position;
+		}
+		else
+		{
+			int rsize = 2*(last - elem);
+			int dist = position - elem;
+			while (rsize < n+(space-elem))
+			{
+				rsize *= 2;
+			}
+			auto tp = alloc.allocate(rsize);
+			for (int i=0; elem + i != position; ++i)
+			{
+				alloc.construct(tp + i, *(elem + i));
+				alloc.destroy(elem + i);
+			}
+			for (int i = 0; i != n; ++i)
+			{
+				alloc.construct(tp + dist + i, v);
+			}
+			for ( ; position != space; ++position)
+			{
+				alloc.construct(tp + (position - elem) + n, *(position));
+				alloc.destroy(position);
+			}
+			alloc.deallocate(elem, space - elem);
+			last = tp + rsize;
+			space = tp + n + (last - elem);
+			elem = tp;
+			return tp + dist;
+		}
 	}
 
-	iterator insert(iterator p, std::initializer_list<int> li)
+	iterator insert(iterator position, iterator  begin, iterator  end)
 	{
+		int size = end-begin;
+		if (last - space >= size)
+		{
+			auto p = space - 1;
+			for (; p >= position; --p)
+			{
+				alloc.construct(p + size, *p);
+				alloc.destroy(p);
+			}
+			for (; begin != end; ++begin)
+			{
+				alloc.construct(position++, *begin);
+			}
+			return p + 1;
+		}
+		else
+		{
+			int dif = position - elem;
+			int rsize = 2 * (last - elem);
+			while (rsize < size + (space - elem))
+			{
+				rsize *= 2;
+			}
+			auto p = alloc.allocate(rsize);
+			for (int i = 0; elem + i != position; ++i)
+			{
+				alloc.construct(p + i, *(elem + i));
+				alloc.destroy(elem + i);
+			}
+			for (int i = position - elem; begin != end; ++begin,++i)
+			{
+				alloc.construct(p + i, *(begin));
+			}
+			for (; position != space; ++position)
+			{
+				alloc.construct(p + (position - elem) + size);
+				alloc.destroy(position);
+			}
+			alloc.deallocate(elem, last - elem);
+			space = p + rsize;
+			last = p + (last - elem) + size;
+			elem = p;
+			return elem + dif;
+		}
+	}
 
+	iterator insert(iterator position, std::initializer_list<int> li)
+	{
+		return insert(position, (iterator)li.begin(), (iterator)li.end());
 	}
 
 	iterator earse(iterator p)
 	{
-
+		return earse(p, p+1);
 	}
 
 	iterator earse(iterator first, iterator last)
 	{
-
-	}
-
-	void clear()
-	{
-
+		for (int i = 0; first + i != last; ++i)
+		{
+			alloc.destroy(first + i);
+		}
+		for (int i = 0; last + i != space; ++i)
+		{
+			alloc.construct(first + i, *(last + i));
+			alloc.destroy(last + i);
+		}
+		return first;
 	}
 
 	//比较与交换*********************************************************************************
