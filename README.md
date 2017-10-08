@@ -1,5 +1,5 @@
 # SimplyEdition-STL-
-make wheel now,this will be a simple C++ Standard Template Library(STL) ,it will include containers ,generics algorithm and iterator and more,maybe  simple STL will help you to understand how it works
+this will be a simple C++ Standard Template Library(STL) ,it will include containers ,generics algorithm and iterator and more and more and soon,maybe  simple STL will help you to understand how it works betters
 
 
 
