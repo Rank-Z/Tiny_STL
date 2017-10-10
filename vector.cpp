@@ -14,12 +14,19 @@ class vector
 	using difference_type = int;
 	using value_type = int;
 	using allocator_type = std::allocator<int>;
+	using pointer = int *;
+	using const_pointer=const int *;
 
 private:
-	int *elem = nullptr;//首地址				==beign()
-	int *space = nullptr;//未使用空间首地址	==end()
-	int *last = nullptr;//总共地址尾后地址
+	iterator elem = nullptr;//首地址				==beign()
+	iterator space = nullptr;//未使用空间首地址	==end()
+	iterator last = nullptr;//总共地址尾后地址
 	allocator_type alloc;//内存管理对象
+
+public:
+	iterator& _first() { return elem; }
+	iterator& _end() { return space; }
+	iterator& _last() { return last; }
 
 public:
 	vector()
@@ -123,7 +130,7 @@ public:
 		}
 		alloc.deallocate(elem, (last - elem));
 		space = p + (space - elem);
-		last = p + (space - elem);
+		last = p + (last - elem)+n;
 		elem = p;
 	}
 
@@ -133,9 +140,9 @@ public:
 		resize(n, v);// !!! Some Complier don't allow to do this
 	}
 
-	void resize(int n, int value)
+	void resize(int n, value_type value)
 	{
-		if (n <= (last - elem))
+		if (n <= (last - elem))//n比原空间小
 		{
 			for (int i = n; elem + i != last; ++i)
 			{
@@ -148,7 +155,7 @@ public:
 				alloc.construct(space, value);
 			}
 		}
-		else
+		else//n比原空间大
 		{
 			auto p = alloc.allocate(n);
 			for (int i = 0; elem + i != space; ++i)
@@ -227,9 +234,14 @@ public:
 		--space;
 	}
 
-	void emplace_back()//args,TODO:泛型编程
+	template<typename ...Args>
+	void emplace_back(Args&&...args)
 	{
-
+		if (last - space == 0)
+		{
+			reserve(last - elem);
+		}
+		alloc.construct(space++, std::forward<Args>(args)...);
 	}
 
 	//列表操作*********************************************************************************************
@@ -395,40 +407,70 @@ public:
 
 	bool operator==(vector& v)
 	{
+		if (size() != v.size())return false;
 
+		for (int i = 0; elem + i != space; ++i)
+		{
+			if (*(elem + i) != v[i])
+				return false;
+		}
+		return true;
 	}
 
 	bool operator!=(vector& v)
 	{
-
+		return !operator==(v);
 	}
 
 	bool operator<(vector& v)
 	{
-
+		int min_size = size() < v.size() ? size() : v.size();
+		for (int i = 0; i != min_size; ++i)
+		{
+			if (*(elem + i) == v[i])continue;
+			if (*(elem + i) < v[i])
+				return true;
+			else
+				return false;
+		}
+		return size() < v.size();
 	}
 
 	bool operator<=(vector& v)
 	{
-
+		return !(v < *(this));
 	}
 
 	bool operator>(vector& v)
 	{
-
+		return v <*(this);
 	}
 
 	bool operator>=(vector& v)
 	{
-
+		return !(operator<(v));
 	}
 
 	void swap(vector& v)
 	{
+		iterator t = _first();
+		_first() = v._first();
+		v._first() = t;
+		
+		t = _end();
+		_end() = v._end();
+		v._end() = t;
 
+		t = _last();
+		_last() = v._last();
+		v._last() = t;
 	}
 
 	friend void swap(vector&v1, vector&v2);
 
-
 };
+
+void swap(vector &v1, vector& v2)
+{
+	v1.swap(v2);
+}
