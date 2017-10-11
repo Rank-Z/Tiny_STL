@@ -36,7 +36,7 @@ public:
 		last = elem + 4;
 	}
 
-	vector(int s) :vector(s,0)//委托给 vector(int s,int value)，并填充为0
+	explicit vector(int s) :vector(s,0)//委托给 vector(int s,int value)，并填充为0
 	{ }
 
 	vector(int s, int value) //填充为value
@@ -72,6 +72,40 @@ public:
 		alloc.deallocate(elem, last - elem);
 	}
 
+	vector& operator=(const vector&v)
+	{
+		int rsize = v.capacity();
+		clear();
+		alloc.deallocate(elem, last - elem);
+		elem = alloc.allocate(rsize);
+		space = elem;
+		for (iterator p = v.begin(); p != v.end(); ++p)
+		{
+			alloc.construct(space++, *(p));
+		}
+		last = elem + rsize;
+		return *this;
+	}
+
+	vector& operator=(std::initializer_list<int> &li)
+	{
+		int lsize = li.size();
+		if (lsize > last - elem)
+		{
+			throw std::range_error("initializer_list can't longer than vector");
+		}
+		clear();
+		for (const_iterator p = li.begin(); p != li.end(); ++p)
+		{
+			alloc.construct(space++, *p);
+		}
+		for (; space != last; ++space)
+		{
+			alloc.construct(space);
+		}
+		return *this;
+	}
+
 	//以上为控制函数
 	/***********************************************************************************************************************************************************/
 	//功能函数
@@ -79,22 +113,22 @@ public:
 
 	//迭代器和指针********************************************************************************
 
-	iterator begin()
+	iterator begin()const
 	{
 		return elem;
 	}
 
-	const iterator cbegin()
+	const iterator cbegin()const
 	{
 		return elem;
 	}
 
-	iterator end()
+	iterator end() const
 	{
 		return space;
 	}
 
-	const iterator cend()
+	const iterator cend()const
 	{
 		return space;
 	}
@@ -102,17 +136,17 @@ public:
 
 	//大小和容量*************************************************************************************
 
-	size_type size()
+	size_type size() const	//元素数目
 	{
-		return static_cast<unsigned>(space - elem);
+		return (space - elem);
 	}
 
-	bool empty()
+	bool empty()const
 	{
 		return (size() == 0);
 	}
 
-	size_type capacity()
+	size_type capacity()const	//已分配的空间大小
 	{
 		return static_cast<unsigned>(last - elem);
 	}
@@ -189,26 +223,27 @@ public:
 		{
 			alloc.destroy(p);
 		}
+		space = elem;
 	}
 
 	//元素访问**************************************************************************************
 
-	value_type& front()
+	value_type& front()const
 	{
 		return *elem;
 	}
 
-	value_type& back()
+	value_type& back()const
 	{
 		return *(space - 1);
 	}
 
-	value_type& operator[](int n)//这里没有将参数限制为无符号数，是想提供无边界检查的访问
+	value_type& operator[](int n)const//这里没有将参数限制为无符号数，是想提供无边界检查的访问
 	{
 		return *(elem + n);
 	}
 
-	value_type& at(int n)
+	value_type& at(int n)const
 	{
 		if (n<0 || n>(space - elem))
 			throw std::out_of_range("vector out of range");
@@ -389,23 +424,24 @@ public:
 		return earse(p, p+1);
 	}
 
-	iterator earse(iterator first, iterator last)
+	iterator earse(iterator begin, iterator end )
 	{
-		for (int i = 0; first + i != last; ++i)
+		for (int i = 0; begin + i != end; ++i)
 		{
-			alloc.destroy(first + i);
+			alloc.destroy(begin + i);
 		}
-		for (int i = 0; last + i != space; ++i)
+		for (int i = 0; end + i != space; ++i)
 		{
-			alloc.construct(first + i, *(last + i));
-			alloc.destroy(last + i);
+			alloc.construct(begin + i, *(end + i));
+			alloc.destroy(end + i);
 		}
-		return first;
+		space = space - (end - begin);
+		return begin;
 	}
 
 	//比较与交换*********************************************************************************
 
-	bool operator==(vector& v)
+	bool operator==(const vector& v)const
 	{
 		if (size() != v.size())return false;
 
@@ -417,12 +453,12 @@ public:
 		return true;
 	}
 
-	bool operator!=(vector& v)
+	bool operator!=(const vector& v)const
 	{
 		return !operator==(v);
 	}
 
-	bool operator<(vector& v)
+	bool operator<(const vector& v)const
 	{
 		int min_size = size() < v.size() ? size() : v.size();
 		for (int i = 0; i != min_size; ++i)
@@ -436,17 +472,17 @@ public:
 		return size() < v.size();
 	}
 
-	bool operator<=(vector& v)
+	bool operator<=(const vector& v)const
 	{
 		return !(v < *(this));
 	}
 
-	bool operator>(vector& v)
+	bool operator>(const vector& v)const
 	{
 		return v <*(this);
 	}
 
-	bool operator>=(vector& v)
+	bool operator>=(const vector& v)const
 	{
 		return !(operator<(v));
 	}
@@ -470,7 +506,7 @@ public:
 
 };
 
-void swap(vector &v1, vector& v2)
+void swap(vector &v1, vector& v2)//非成员版本的swap，在泛型编程中非常重要
 {
 	v1.swap(v2);
 }
