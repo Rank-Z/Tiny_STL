@@ -36,17 +36,17 @@ public:
 		last = elem + 4;
 	}
 
-	explicit vector(int s) :vector(s,0)//委托给 vector(int s,int value)，并填充为0
+	explicit vector(size_type s) :vector(s,0)//委托给 vector(int s,int value)，并填充为0
 	{ }
 
-	vector(int s, int value) //填充为value
+	vector(size_type s, value_type value) //填充为value
 	{
 		elem = alloc.allocate(s);
 		std::uninitialized_fill_n(elem, s, value);
 		space = last = elem + s;
 	}
-	//TODO:这个构造是否高效、安全？？？
-	vector(const int *b,const int *c) //why const ? 
+	
+	vector(const int *b,const int *c) 
 	{
 		difference_type p_diff = c - b;
 		elem = alloc.allocate(p_diff);
@@ -143,7 +143,7 @@ public:
 
 	bool empty()const
 	{
-		return (size() == 0);
+		return (begin()==end());
 	}
 
 	size_type capacity()const	//已分配的空间大小
@@ -151,14 +151,14 @@ public:
 		return static_cast<unsigned>(last - elem);
 	}
 
-	void reserve(int n)
+	void reserve(size_type n)
 	{
-		auto p = alloc.allocate((last - elem) + n);
+		iterator p = alloc.allocate((last - elem) + n);
 		for (int i = 0; elem + i != space; ++i)
 		{
 			*(p + i) = *(elem + i);
 		}
-		for (auto it = elem; it != space; ++it)
+		for (iterator it = elem; it != space; ++it)
 		{
 			alloc.destroy(it);//析构容器中每个元素
 		}
@@ -168,13 +168,13 @@ public:
 		elem = p;
 	}
 
-	void resize(int n)
+	void resize(size_type n)
 	{
 		value_type v;
 		resize(n, v);// !!! Some Complier don't allow to do this
 	}
 
-	void resize(int n, value_type value)
+	void resize(size_type n, value_type value)
 	{
 		if (n <= (last - elem))//n比原空间小
 		{
@@ -191,7 +191,7 @@ public:
 		}
 		else//n比原空间大
 		{
-			auto p = alloc.allocate(n);
+			iterator p = alloc.allocate(n);
 			for (int i = 0; elem + i != space; ++i)
 			{
 				*(p + i) = *(elem + i);
@@ -285,20 +285,20 @@ public:
 	{
 		if (last - space)
 		{
-			auto p = space - 1;
+			iterator p = space - 1;
 			for (; p >= position; --p)
 			{
 				alloc.construct(p + 1, *p);
 				alloc.destroy(p);
 			}
 			alloc.construct(position, std::move(v));
-			last++;
+			++last;
 			return position;
 		}
 		else
 		{
-			auto p = alloc.allocate(2 * (last - elem));
-			int dif = position - elem;
+			iterator p = alloc.allocate(2 * (last - elem));
+			difference_type dif = position - elem;
 			for (int i = 0; i!=dif; ++i)
 			{
 				alloc.construct(p + i, *(elem + i));
@@ -322,7 +322,7 @@ public:
 	{
 		if (last - space >= n)
 		{
-			auto p = space - 1;
+			iterator p = space - 1;
 			for ( ; p >=position; --p)
 			{
 				alloc.construct(p + n, *p);
@@ -338,12 +338,12 @@ public:
 		else
 		{
 			int rsize = 2*(last - elem);
-			int dist = position - elem;
+			difference_type dist = position - elem;
 			while (rsize < n+(space-elem))
 			{
 				rsize *= 2;
 			}
-			auto tp = alloc.allocate(rsize);
+			iterator tp = alloc.allocate(rsize);
 			for (int i=0; elem + i != position; ++i)
 			{
 				alloc.construct(tp + i, *(elem + i));
@@ -368,10 +368,10 @@ public:
 
 	iterator insert(iterator position, iterator  begin, iterator  end)
 	{
-		int size = end-begin;
+		size_type size = end-begin;
 		if (last - space >= size)
 		{
-			auto p = space - 1;
+			iterator p = space - 1;
 			for (; p >= position; --p)
 			{
 				alloc.construct(p + size, *p);
@@ -385,13 +385,13 @@ public:
 		}
 		else
 		{
-			int dif = position - elem;
+			difference_type dif = position - elem;
 			int rsize = 2 * (last - elem);
 			while (rsize < size + (space - elem))
 			{
 				rsize *= 2;
 			}
-			auto p = alloc.allocate(rsize);
+			iterator p = alloc.allocate(rsize);
 			for (int i = 0; elem + i != position; ++i)
 			{
 				alloc.construct(p + i, *(elem + i));
@@ -460,7 +460,7 @@ public:
 
 	bool operator<(const vector& v)const
 	{
-		int min_size = size() < v.size() ? size() : v.size();
+		size_type min_size = size() < v.size() ? size() : v.size();
 		for (int i = 0; i != min_size; ++i)
 		{
 			if (*(elem + i) == v[i])continue;
