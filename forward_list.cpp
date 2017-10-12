@@ -18,14 +18,26 @@ class foward_list
 private:
 	iterator _First = nullptr;
 	allocator_type alloc;
+	struct _Node
+	{
+		_Node* next = nullptr;
+		value_type val;
+	} _HeadNode;
 
 public:
 
 	forward_list()
 	{   }
 
+	foward_list(size_type _Size, const Alloc& _Alloc)
+	{
 
+	}
 
+	forward_list(size_type _Size, const Ty& _Val)
+	{
+
+	}
 
 
 
