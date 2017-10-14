@@ -12,11 +12,10 @@ class forward_list
 		_Node* next = nullptr;
 		_Ty val;
 
-		_Node(_Node* n, _Ty v)
-		{
-			next = n;
-			val = v;
-		}
+		template<typename..._Args>
+		_Node(_Node* n, _Args&&..._args) :next(n),val(std::forward<_Args>(_args)...)
+		{   }
+
 	};
 	using value_type = _Ty;
 	using iterator = _Ty*;
@@ -95,7 +94,17 @@ public:
 		}
 	}
 
-/*********************************************************************************/
+	forward_list& operator=(std::initializer_list<_Ty> il)
+	{
+		//TODO:
+	}
+
+	~forward_list()
+	{
+		_Clear_n(_Head);
+	}
+
+/***********************************************************************************************/
 
 	void _Construct_n(size_type _Size, const _Ty _Val)
 	{
@@ -104,10 +113,18 @@ public:
 			temp = _BuyNode(temp, _Val);
 		_Head = temp;
 	}
+
 	template<typename..._Args>
-	_Node_pointer _BuyNode(_Node_pointer addr,_Args..._args)
+	_Node_pointer _BuyNode(_Node_pointer addr,_Args&&..._args)
 	{
 		return new _Node(addr,std::forward(_args)...);
+	}
+
+	void _Clear_n(_Node_pointer _Where)
+	{
+		if (_Where->next)
+			_Clear_n(_Where->next);
+		delete _Where;
 	}
 
 	_Node_pointer& _GetHead()const
@@ -115,7 +132,7 @@ public:
 		return _Head;
 	}
 
-/*********************************************************************************/
+/************************************************************************************************/
 	
 	_Node_pointer begin()const
 	{
@@ -130,12 +147,6 @@ public:
 	_Node_pointer end()const
 	{
 		return nullptr;
-	}
-
-	template<typename..._Args>
-	_Node_pointer _Insert_after(_Node_pointer _Where, _Args&&..._args)
-	{
-		return _Where->next=_BuyNode(_Where->next, std::forward(_args)...);
 	}
 
 	const _Node_pointer cend()const
@@ -157,9 +168,15 @@ public:
 		_Head = _BuyNode(nullptr, std::forward(_args)...);
 	}
 
+	template<typename..._Args>
+	_Node_pointer _Insert_after(_Node_pointer _Where, _Args&&..._args)
+	{
+		return _BuyNode(_Where->next, std::forward(_args)...);
+	}
+
 	_Node_pointer insert_after(const _Node_pointer _Where, const _Ty _Val)
 	{
-		return _Insert_after(_Where, _Val);
+		return _Where->next=_Insert_after(_Where, _Val);
 	}
 
 	_Node_pointer insert_after(const _Node_pointer _Where, const size_type _Count, const _Ty _Val)
@@ -169,7 +186,7 @@ public:
 		{
 			temp = _Insert_after(temp, _Val);
 		}
-		return temp;
+		return _Where->next=temp;
 	}
 
 	template<typename Iter>
@@ -181,11 +198,21 @@ public:
 		{
 			temp = _Insert_after(temp, *it);
 		}
-		return temp;
+		return _Where->next=temp;
 	}
 
-	_Node_pointer insert_after(const _Node_pointer _Where,const std::initializer_list<_Ty> il)
+	_Node_pointer insert_after(const _Node_pointer _Where, std::initializer_list<_Ty> il)
 	{
 		return insert_after(_Where, il.begin(), il.end());
 	}
+
+	template<typename..._Args>
+	_Node_pointer emplace_after(const _Node_pointer _Where, _Args..._args)
+	{
+		return _Where->next = _Insert_after(_Where, std::forward(_args)...);
+	}
+
+
+
+
 };
