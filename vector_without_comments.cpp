@@ -63,15 +63,6 @@ public:
 	vector(vector& v) :vector(v.cbegin(), v.cend())
 	{ }
 
-	~vector()
-	{
-		for (auto p = elem; p != space; ++p)
-		{
-			alloc.destroy(p);
-		}
-		alloc.deallocate(elem, last - elem);
-	}
-
 	vector& operator=(const vector&v)
 	{
 		int rsize = v.capacity();
@@ -106,6 +97,17 @@ public:
 		return *this;
 	}
 
+	~vector()
+	{
+		for (auto p = elem; p != space; ++p)
+		{
+			alloc.destroy(p);
+		}
+		alloc.deallocate(elem, last - elem);
+	}
+
+/*******************************************************************************/
+
 	iterator begin()const
 	{
 		return elem;
@@ -125,6 +127,8 @@ public:
 	{
 		return space;
 	}
+
+/********************************************************************************/
 
 	size_type size() const	
 	{
@@ -207,6 +211,8 @@ public:
 		}
 	}
 
+/*******************************************************************************/
+
 	void clear()
 	{
 		for (iterator p = elem; p != space; ++p)
@@ -239,6 +245,8 @@ public:
 			return *(elem + n);
 	}
 
+/*******************************************************************************/
+
 	void push_back(value_type v)
 	{
 		if (!(last - space))
@@ -264,6 +272,8 @@ public:
 		}
 		alloc.construct(space++, std::forward<Args>(args)...);
 	}
+
+/**********************************************************************************/
 
 	iterator insert(iterator position, value_type &&v)
 	{
@@ -422,6 +432,8 @@ public:
 		space = space - (end - begin);
 		return begin;
 	}
+
+/*******************************************************************************/
 
 	bool operator==(const vector& v)const
 	{
