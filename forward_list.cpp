@@ -24,8 +24,8 @@ class forward_list
 	using size_type = unsigned;
 	using difference_type = int;
 	using allocator_type = std::allocator<_Node>;
-	using _Node_pointer = _Node*;
-	using const_Node_pointer = const _Node_pointer;
+	using _Nodeptr = _Node*;
+	using const_Nodeptr = const _Nodeptr;
 private:
 	_Node* _Head = nullptr;
 
@@ -41,10 +41,10 @@ public:
 
 	forward_list(const forward_list& _Right)
 	{
-		_Node_pointer Rp = _Right.begin();
+		_Nodeptr Rp = _Right.begin();
 		if(Rp):
 		{
-			_Node_pointer temp =_BuyNode(nullptr, Rp->val);
+			_Nodeptr temp =_BuyNode(nullptr, Rp->val);
 			_Head = temp;
 			Rp = Rp->next;
 		}
@@ -72,10 +72,10 @@ public:
 
 	forward_list& operator=(const forward_list& _Right)
 	{
-		_Node_pointer Rp = _Right.begin();
+		_Nodeptr Rp = _Right.begin();
 		if (Rp) :
 		{
-			_Node_pointer temp = _BuyNode(nullptr, Rp->val);
+			_Nodeptr temp = _BuyNode(nullptr, Rp->val);
 			_Head = temp;
 			Rp = Rp->next;
 		}
@@ -110,30 +110,30 @@ public:
 private:
 	void _Construct_n(size_type _Size, const _Ty& _Val)
 	{
-		_Node_pointer temp = nullptr;
+		_Nodeptr temp = nullptr;
 		for (int i = 0; i != _Size; ++i)
 			temp = _BuyNode(temp, &_Val);
 		_Head = temp;
 	}
 
 	template<typename..._Args>
-	_Node_pointer _BuyNode(_Node_pointer addr,_Args&&..._args)
+	_Nodeptr _BuyNode(_Nodeptr addr,_Args&&..._args)
 	{
 		return new _Node(addr,std::forward(_args)...);
 	}
 
-	void _Clear_n(_Node_pointer _Where)
+	void _Clear_n(_Nodeptr _Where)
 	{
 		if (_Where->next)
 			_Clear_n(_Where->next);
-		delete _Where;
+		_Freenode(_Where);
 	}
 
 	template<typename Iter>
-	_Node_pointer _Construct_from_end(_Node_pointer _Where,Iter begin, Iter end)
+	_Nodeptr _Construct_from_end(_Nodeptr _Where,Iter begin, Iter end)
 	{
 		//assuem Iter support operator -- and begin is always less than end
-		_Node_pointer temp = _Where->next;
+		_Nodeptr temp = _Where->next;
 		for (Iter it = end; it > begin, --it)
 		{
 			temp = _Insert_after(temp, *it);
@@ -144,12 +144,12 @@ private:
 	size_type _Size()const
 	{
 		size_type _Counter = 0;
-		for (_Node_pointer temp = _Head; temp; ++_Counter)
+		for (_Nodeptr temp = _Head; temp; ++_Counter)
 			temp = temp->next;
 		return _Counter;
 	}
 
-	_Node_pointer _Before_end()
+	_Nodeptr _Before_end()
 	{
 		_Node_poninter temp = _Head;
 		if(temp)
@@ -158,37 +158,42 @@ private:
 		return temp;
 	}
 
+	void _Freenode(_Nodeptr _Where)
+	{
+		delete _Where;
+	}
+
 /************************************************************************************************/
 public:
 
-	_Node_pointer& _GetHead()const
+	_Nodeptr& _GetHead()const
 	{
 		return _Head;
 	}
 
-	_Node_pointer begin()const
+	_Nodeptr begin()const
 	{
 		return _Head->next;
 	}
 
-	const _Node_pointer	cbegin()const
+	const _Nodeptr	cbegin()const
 	{
 		return _Head->next;
 	}
 
-	_Node_pointer end()const
+	_Nodeptr end()const
 	{
 		return nullptr;
 	}
 
-	const _Node_pointer cend()const
+	const _Nodeptr cend()const
 	{
 		return nullptr;
 	}
 
 	void push_front(const _Ty& _Val)
 	{
-		_Node_pointer p = new _Node;
+		_Nodeptr p = new _Node;
 		p->val = _Val;
 		p->next = _Head;
 		_Head = p;
@@ -201,19 +206,19 @@ public:
 	}
 
 	template<typename..._Args>
-	_Node_pointer _Insert_after(_Node_pointer _Where, _Args&&..._args)
+	_Nodeptr _Insert_after(_Nodeptr _Where, _Args&&..._args)
 	{
 		return _BuyNode(_Where->next, std::forward(_args)...);
 	}
 
-	_Node_pointer insert_after(const _Node_pointer _Where, const _Ty& _Val)
+	_Nodeptr insert_after(const _Nodeptr _Where, const _Ty& _Val)
 	{
 		return _Where->next=_Insert_after(_Where, _Val);
 	}
 
-	_Node_pointer insert_after(const _Node_pointer _Where, const size_type _Count, const _Ty& _Val)
+	_Nodeptr insert_after(const _Nodeptr _Where, const size_type _Count, const _Ty& _Val)
 	{
-		_Node_pointer temp = _Where->next;
+		_Nodeptr temp = _Where->next;
 		for (int i = 0; i != _Count, ++i)
 		{
 			temp = _Insert_after(temp, _Val);
@@ -222,18 +227,18 @@ public:
 	}
 
 	template<typename Iter>
-	_Node_pointer insert_after(const _Node_pointer _Where, Iter begin, Iter end)
+	_Nodeptr insert_after(const _Nodeptr _Where, Iter begin, Iter end)
 	{
 		return _Where->next= _Construct_from_end(_Where, begin, end);
 	}
 
-	_Node_pointer insert_after(const _Node_pointer _Where, std::initializer_list<_Ty> il)
+	_Nodeptr insert_after(const _Nodeptr _Where, std::initializer_list<_Ty> il)
 	{
 		return insert_after(_Where, il.begin(), il.end());
 	}
 
 	template<typename..._Args>
-	_Node_pointer emplace_after(const _Node_pointer _Where, _Args&&..._args)
+	_Nodeptr emplace_after(const _Nodeptr _Where, _Args&&..._args)
 	{
 		return _Where->next = _Insert_after(_Where, std::forward(_args)...);
 	}
@@ -261,7 +266,7 @@ public:
 		size_type _Cursize = _Size();
 		if (_Cursize < _Newsize)
 		{
-			_Node_pointer temp = nullptr;
+			_Nodeptr temp = nullptr;
 			for (int i = _Newsize - _Cursize;0<i; --i)
 			{
 				temp = _BuyNode(temp);
@@ -270,7 +275,7 @@ public:
 		}
 		else if(_Newsize<_Cursize)
 		{
-			_Node_pointer temp = _Head;
+			_Nodeptr temp = _Head;
 			for (; 0 < _Newsize; --_Newsize)
 				temp = temp->next;
 			_Clear_n(temp);
@@ -286,23 +291,23 @@ public:
 	{
 		if (_Head)
 		{
-			_Node_pointer temp = _Head->next->next;
-			delete _Head;
+			_Nodeptr temp = _Head->next->next;
+			_Freenode(_Head);
 			_Head = temp;
 		}
 	}
 
-	_Node_pointer before_begin()const
+	_Nodeptr before_begin()const
 	{
-		return _Head;
+		return new _Node(_Head);
 	}
 
-	_Node_pointer cbefore_begin()const
+	const_Nodeptr cbefore_begin()const
 	{
-		return _Head;
+		return new _Node(_Head);
 	}
 
-	_Node_pointer earse_after(const_Node_pointer _Where)
+	_Nodeptr earse_after(const_Nodeptr _Where)
 	{
 		if (_Where == nullptr)
 		{
@@ -310,14 +315,14 @@ public:
 		}
 		if (_Where->next)
 		{
-			_Node_pointer temp = _Where->next->next;
-			delete _Where->next;
+			_Nodeptr temp = _Where->next->next;
+			_Freenode(_Where->next);
 			return _Where->next = temp;
 		}
 		return nullptr;
 	}
 
-	_Node_pointer earse_after(const_Node_pointer _First, const_Node_pointer _Last)//earse elements between _First and _Last
+	_Nodeptr earse_after(const_Nodeptr _First, const_Nodeptr _Last)//earse elements between _First and _Last
 	{
 		if (!_First)
 			return nullptr;
@@ -327,16 +332,75 @@ public:
 		}
 		else
 		{
-			_Node_pointer temp = _First->next;
-			for (; temp!=_Last;)
+			_Nodeptr temp = _First->next;
+			_Nodeptr next;
+			for (; temp!=_Last;temp=next)
 			{
-				_Node_pointer next = temp->next;
-				delete temp;
-				temp = next;
+				next = temp->next;
+				_Freenode(temp);
 			}
 			_First->next = _Last;
 		}
 		return _Last;
 	}
 
+	void clear()
+	{
+		_Nodeptr temp = _Head;
+		_Nodeptr next;
+		_Head = nullptr;
+		for (; temp != nullptr; temp = next)
+		{
+			next = temp->next;
+			_Freenode(temp);
+		}
+	}
+
+	void swap(forward_list& _Right)
+	{
+		if (this != &_Right)
+		{
+			_Nodeptr temp=_Head;
+			_Head = _Right._GetHead();
+			_Right._GetHead() = _Head;
+		}
+	}
+
+	void remove(const _Ty& _Val)
+	{
+		if (!_GetHead())
+			return;
+		_Nodeptr temp = before_begin();// before_begin() is inline function
+		_Nodeptr _End = end();
+		for (_Nodeptr next = temp->next; next != end();next=next->next)
+		{
+			if (next->val == _Val)
+			{
+				if ((&next->val == &_Val))
+				{
+					_End = temp;
+					temp = next;
+				}
+				else
+					next = erase_after(temp);
+			}
+			else
+				temp = next;
+		}
+		if (_End != end())
+			erase_after(_End);
+	}
+
+	template<typename _Pr>
+	void remove_if(_Pr _Pred)
+	{
+		if (!_GetHead())
+			return;
+		_Nodeptr temp = before_begin();
+		for (_Nodeptr next = begin(); next != end(); next = next->next)
+			if (_Pred(next->val))
+				next = earse_after(temp);
+			else
+				temp = next;
+	}
 };
