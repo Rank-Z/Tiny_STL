@@ -307,7 +307,7 @@ public:
 		return new _Node(_Head);
 	}
 
-	_Nodeptr earse_after(const_Nodeptr _Where)
+	_Nodeptr erase_after(const_Nodeptr _Where)
 	{
 		if (_Where == nullptr)
 		{
@@ -322,7 +322,7 @@ public:
 		return nullptr;
 	}
 
-	_Nodeptr earse_after(const_Nodeptr _First, const_Nodeptr _Last)//earse elements between _First and _Last
+	_Nodeptr erase_after(const_Nodeptr _First, const_Nodeptr _Last)//earse elements between _First and _Last
 	{
 		if (!_First)
 			return nullptr;
@@ -372,7 +372,7 @@ public:
 			return;
 		_Nodeptr temp = before_begin();// before_begin() is inline function
 		_Nodeptr _End = end();
-		for (_Nodeptr next = temp->next; next != end();next=next->next)
+		for (_Nodeptr next = temp->next; next != end();)
 		{
 			if (next->val == _Val)
 			{
@@ -380,6 +380,7 @@ public:
 				{
 					_End = temp;
 					temp = next;
+					next = next->next
 				}
 				else
 					next = erase_after(temp);
@@ -397,10 +398,51 @@ public:
 		if (!_GetHead())
 			return;
 		_Nodeptr temp = before_begin();
-		for (_Nodeptr next = begin(); next != end(); next = next->next)
+		for (_Nodeptr next = begin(); next != end();)
 			if (_Pred(next->val))
-				next = earse_after(temp);
+				next = erase_after(temp);
 			else
+			{
 				temp = next;
+				next = next->next;
+			}
+	}
+
+	void unique()
+	{
+		if (_Nodeptr _First = begin())
+		{
+			_Nodeptr _After = _First->next;
+			for ( ; _After != end(); )
+				if (_First->val == _After->val)
+					_After = erase_after(_First);
+				else
+				{
+					_First = _First->next;
+					_After = _After->next;
+				}
+		}
+	}
+
+	template<typename _Pr>
+	void unique(_Pr _Pred)
+	{
+		if (_Nodeptr _First = begin())
+		{
+			_Nodeptr _After = _First->next;
+			for (; _After != end(); )
+				if (_Pred(_First->val,_After->val)
+					_After = erase_after(_First);
+				else
+				{
+					_First = _First->next;
+					_After = _After->next;
+				}
+		}
+	}
+
+	void sort()
+	{
+
 	}
 };
