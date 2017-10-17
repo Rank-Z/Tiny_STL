@@ -1,7 +1,7 @@
 #include<memory>
 #include<initializer_list>
 #include<utility>
-
+#define _STD ::std::
 
 template<typename _Ty>
 class forward_list
@@ -13,7 +13,7 @@ class forward_list
 		_Ty val;
 
 		template<typename..._Args>
-		_Node(_Node* n, _Args&&..._args) :next(n),val(std::forward<_Args>(_args)...)
+		_Node(_Node* n, _Args&&..._args) :next(n),val(_STD forward<_Args>(_args)...)
 		{   }
 
 	};
@@ -23,7 +23,7 @@ class forward_list
 	using const_iterator = const _Ty *;
 	using size_type = unsigned;
 	using difference_type = int;
-	using allocator_type = std::allocator<_Node>;
+	using allocator_type = _STD allocator<_Node>;
 	using _Nodeptr = _Node*;
 	using const_Nodeptr = const _Nodeptr;
 private:
@@ -58,7 +58,7 @@ public:
 
 	forward_list(forward_list&& _Right)
 	{
-		_Head = std::move(_Right._GetHead());
+		_Head = _STD move(_Right._GetHead());
 	}
 
 	template<typename Iter>
@@ -67,7 +67,7 @@ public:
 		_Head = _Construct_from_end(nullptr, begin, end);
 	}
 
-	forward_list(std::initializer_list<_Ty> il):forward_list(il.begin(),il.end())
+	forward_list(_STD initializer_list<_Ty> il):forward_list(il.begin(),il.end())
 	{   }
 
 	forward_list& operator=(const forward_list& _Right)
@@ -90,11 +90,11 @@ public:
 
 	forward_list& operator=(forward_list&& _Right)
 	{
-		_Head = std::move(_Right._GetHead());
+		_Head = _STD move(_Right._GetHead());
 		return *this;
 	}
 
-	forward_list& operator=(std::initializer_list<_Ty> il)
+	forward_list& operator=(_STD initializer_list<_Ty> il)
 	{
 		_Clear_n(_Head);
 		_Head = _Construct_from_end(nullptr, il.begin(), il.end());
@@ -119,7 +119,7 @@ private:
 	template<typename..._Args>
 	_Nodeptr _BuyNode(_Nodeptr addr,_Args&&..._args)
 	{
-		return new _Node(addr,std::forward(_args)...);
+		return new _Node(addr,_STD forward(_args)...);
 	}
 
 	void _Clear_n(_Nodeptr _Where)
@@ -166,19 +166,19 @@ private:
 /************************************************************************************************/
 public:
 
-	_Nodeptr& _GetHead()const
+	_Nodeptr& _GetHead()
 	{
 		return _Head;
 	}
 
 	_Nodeptr begin()const
 	{
-		return _Head->next;
+		return _Head;
 	}
 
 	const _Nodeptr	cbegin()const
 	{
-		return _Head->next;
+		return _Head;
 	}
 
 	_Nodeptr end()const
@@ -202,13 +202,13 @@ public:
 	template<typename..._Args>
 	auto emplace_front(_Args&&..._args)
 	{
-		_Head = _BuyNode(nullptr, std::forward(_args)...);
+		_Head = _BuyNode(nullptr, _STD forward(_args)...);
 	}
 
 	template<typename..._Args>
 	_Nodeptr _Insert_after(_Nodeptr _Where, _Args&&..._args)
 	{
-		return _BuyNode(_Where->next, std::forward(_args)...);
+		return _BuyNode(_Where->next,_STD forward(_args)...);
 	}
 
 	_Nodeptr insert_after(const _Nodeptr _Where, const _Ty& _Val)
@@ -232,7 +232,7 @@ public:
 		return _Where->next= _Construct_from_end(_Where, begin, end);
 	}
 
-	_Nodeptr insert_after(const _Nodeptr _Where, std::initializer_list<_Ty> il)
+	_Nodeptr insert_after(const _Nodeptr _Where, _STD initializer_list<_Ty> il)
 	{
 		return insert_after(_Where, il.begin(), il.end());
 	}
@@ -240,10 +240,10 @@ public:
 	template<typename..._Args>
 	_Nodeptr emplace_after(const _Nodeptr _Where, _Args&&..._args)
 	{
-		return _Where->next = _Insert_after(_Where, std::forward(_args)...);
+		return _Where->next = _Insert_after(_Where, _STD forward(_args)...);
 	}
 
-	void assign(std::initializer_list<_Ty> il)
+	void assign(_STD initializer_list<_Ty> il)
 	{
 		assign(il.begin(), il.end());
 	}
@@ -431,7 +431,7 @@ public:
 		{
 			_Nodeptr _After = _First->next;
 			for (; _After != end(); )
-				if (_Pred(_First->val,_After->val)
+				if (_Pred(_First->val,_After->val))
 					_After = erase_after(_First);
 				else
 				{
@@ -445,4 +445,142 @@ public:
 	{
 
 	}
+
+	template<typename _Pr>
+	void sort(_Pr _Pred)
+	{
+
+	}
+
+	void merge(forward_list& _Right)
+	{
+		_Nodeptr _L = begin();
+		_Nodeptr _R = _Right.begin();
+		if (_R->val < _L->val)
+		{
+			_Head = _R;
+			_R = _R->next;
+		}
+		else
+		{
+			_Head = _L;
+			_L = _L->next;
+		}
+		_Nodeptr temp = _Head
+		for ( ;_L&&_R;temp=temp->next)
+		{
+			if (_R->val < _L-val)
+			{
+				temp->next = _R;
+				_R = _R->next;
+			}
+			else
+			{
+				temp->next= _L;
+				_L = _L->next;  
+			}
+		}
+		if (_L)
+			temp->next = _L;
+		else
+			temp->next = _R;
+
+		_Right._GetHead() = nullptr;
+	}
+
+	void merge(forward_list&& _Right)
+	{
+		merge(_Right);
+	}
+
+	template<typename _Pr>
+	void merge(forward_list& _Right, _Pr _Pred)
+	{
+		_Nodeptr _L = begin();
+		_Nodeptr _R = _Right.begin();
+		if (_Pred(_R->val,_L->val))
+		{
+			_Head = _R;
+			_R = _R->next;
+		}
+		else
+		{
+			_Head = _L;
+			_L = _L->next;
+		}
+		_Nodeptr temp = _Head
+			for (; _L&&_R; temp = temp->next)
+			{
+				if (_Pred(_R->val,_L->val))
+				{
+					temp->next = _R;
+					_R = _R->next;
+				}
+				else
+				{
+					temp->next = _L;
+					_L = _L->next;
+				}
+			}
+		if (_L)
+			temp->next = _L;
+		else
+			temp->next = _R;
+
+		_Right._GetHead() = nullptr;
+	}
+
+	template<typename _Pr>
+	void merge(forward_list&& _Right, _Pr _Pred)
+	{
+		merge(_Right, _Pred);
+	}
+
+	void _Splice_after(const_Nodeptr _Where,
+		forward_list& _Right, const_Nodeptr _First, const_Nodeptr _Last)
+	{
+		if (_First == _Last || _First->next==_Last||)
+			return;
+		_Nodeptr _begin = _First->next;
+		if (_First->next == _Right.begin())
+			_Right._GetHead() = _Last;
+		else
+			_First->next = _Last;
+		_Nodeptr _end = _begin;
+		for (; _end->next != _Last;)
+			end = end->next;
+		end->next = _Where->next;
+		_Where->next = _begin;
+	}
+
+	void splice_after(const_Nodeptr _Where, forward_list& _Right)
+	{
+		_Splice_after(_Where, _Right, _Right.before_begin(), _Right.end());
+	}
+
+	void splice_after(const_Nodeptr _Where, forward_list&& _Right)
+	{
+		_Splice_after(_Where, _Right, _Right.before_begin(), _Right.end());
+	}
+
+	void splice_after(const_Nodeptr _Where, forward_list& _Right, const_Nodeptr _First)
+	{
+		_Splice_after(_Where, _Right, _First, _Right.end());
+	}
+
+	void splice_after(const_Nodeptr _Where, forward_list&& _Right, const_Nodeptr _First)
+	{
+		_Splice_after(_Where, _Right, _First, _Right.end());
+	}
+
+	void splice_after(const_Nodeptr _Where, forward_list& _Right, const_Nodeptr _First, const_Nodeptr _Last)
+	{
+		_Splice_after(_Where, _Right, _First, _Last);
+	}
+
+	void splice_after(const_Nodeptr _Where, forward_list&& _Right, const_Nodeptr _First, const_Nodeptr _Last)
+	{
+		_Splice_after(_Where, _Right, _First, _Last);
+	}
+
 };
