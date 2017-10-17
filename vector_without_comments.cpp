@@ -2,6 +2,7 @@
 #include<memory>
 #include<stdexcept>
 #include<utility>
+#define _STD ::std::
 
 class vector
 {
@@ -13,7 +14,7 @@ class vector
 	using size_type = unsigned;
 	using difference_type = int;
 	using value_type = int;
-	using allocator_type = std::allocator<int>;
+	using allocator_type = _STD allocator<int>;
 	using pointer = int *;
 	using const_pointer = const int *;
 
@@ -42,7 +43,7 @@ public:
 	vector(size_type s, value_type value) 
 	{
 		elem = alloc.allocate(s);
-		std::uninitialized_fill_n(elem, s, value);
+		_STD uninitialized_fill_n(elem, s, value);
 		space = last = elem + s;
 	}
 
@@ -57,7 +58,7 @@ public:
 		}
 	}
 
-	vector(std::initializer_list<int> &il) :vector(il.begin(), il.end())
+	vector(_STD initializer_list<int> &il) :vector(il.begin(), il.end())
 	{ }
 
 	vector(vector& v) :vector(v.cbegin(), v.cend())
@@ -78,12 +79,12 @@ public:
 		return *this;
 	}
 
-	vector& operator=(std::initializer_list<int> &li)
+	vector& operator=(_STD initializer_list<int> &li)
 	{
 		int lsize = li.size();
 		if (lsize > last - elem)
 		{
-			throw std::range_error("initializer_list can't longer than vector");
+			throw _STD range_error("initializer_list can't longer than vector");
 		}
 		clear();
 		for (const_iterator p = li.begin(); p != li.end(); ++p)
@@ -240,7 +241,7 @@ public:
 	value_type& at(int n)const
 	{
 		if (n<0 || n>(space - elem))
-			throw std::out_of_range("vector out of range");
+			throw _STD out_of_range("vector out of range");
 		else
 			return *(elem + n);
 	}
@@ -270,7 +271,7 @@ public:
 		{
 			reserve(last - elem);
 		}
-		alloc.construct(space++, std::forward<Args>(args)...);
+		alloc.construct(space++, _STDforward<Args>(args)...);
 	}
 
 /**********************************************************************************/
@@ -285,7 +286,7 @@ public:
 				alloc.construct(p + 1, *p);
 				alloc.destroy(p);
 			}
-			alloc.construct(position, std::move(v));
+			alloc.construct(position, _STD move(v));
 			++last;
 			return position;
 		}
@@ -298,7 +299,7 @@ public:
 				alloc.construct(p + i, *(elem + i));
 				alloc.destroy(elem + i);
 			}
-			alloc.construct(p + (position - elem), std::forward<value_type>(v));
+			alloc.construct(p + (position - elem), _STD forward<value_type>(v));
 			for (; position != space; ++position)
 			{
 				alloc.construct(p + 1 + (position - elem), *(position));
@@ -408,7 +409,7 @@ public:
 		}
 	}
 
-	iterator insert(iterator position, std::initializer_list<int> li)
+	iterator insert(iterator position, _STD initializer_list<int> li)
 	{
 		return insert(position, (iterator)li.begin(), (iterator)li.end());
 	}

@@ -443,13 +443,95 @@ public:
 
 	void sort()
 	{
-
+		_Sort(before_begin(), end());
 	}
 
 	template<typename _Pr>
 	void sort(_Pr _Pred)
 	{
+		_Sort(before_begin(), end(), _Pred);
+	}
 
+	void _Sort(_Nodeptr _Before_first, _Nodeptr _Last)
+	{
+		size_type _Size=0;
+		for (_Nodeptr t = _Before_first->next; t != _Last; ++_Size)
+			t = t->next;
+
+		if (_Size < 2)
+			return;
+
+		_Nodeptr _Mid = _jump(_Before_first, 1 + _Size / 2);
+		_Sort(_Before_first, _Mid);
+		_Nodeptr _First = _jump(_Before_first);
+
+		_Nodeptr _Before_mid = _jump(_Before_first, _Size / 2);
+		_Sort(_Before_mid, _Last);
+		_Mid = _jump(_Before_mid);
+
+		for (;;)
+		{
+			if (*Mid < *_First)
+			{
+				splice_after(_Before_first, *this, _Before_mid);
+				_Before_first = _Before_first->next;
+				_Mid = _jump(_Before_mid);
+				if (_Mid == _Last)
+					return;
+			}
+			else
+			{
+				_Before_first = _Before_first->next;
+				_First = _First->next;
+				if (_First == _Mid)
+					return;
+			}
+		}
+	}
+
+	template<typename _Pr>
+		void _Sort(_Nodeptr _Before_first, _Nodeptr _Last,_Pr _Pred)
+	{
+		size_type _Size = 0;
+		for (_Nodeptr t = _Before_first->next; t != _Last; ++_Size)
+			t = t->next;
+
+		if (_Size < 2)
+			return;
+
+		_Nodeptr _Mid = _jump(_Before_first, 1 + _Size / 2);
+		_Sort(_Before_first, _Mid);
+		_Nodeptr _First = _jump(_Before_first);
+
+		_Nodeptr _Before_mid = _jump(_Before_first, _Size / 2);
+		_Sort(_Before_mid, _Last);
+		_Mid = _jump(_Before_mid);
+
+		for (;;)
+		{
+			if (_Pred(_Mid->next,_First->next))
+			{
+				splice_after(_Before_first, *this, _Before_mid);
+				_Before_first = _Before_first->next;
+				_Mid = _jump(_Before_mid);
+				if (_Mid == _Last)
+					return;
+			}
+			else
+			{
+				_Before_first = _Before_first->next;
+				_First = _First->next;
+				if (_First == _Mid)
+					return;
+			}
+		}
+	}
+	_Nodeptr _jump(_Nodeptr _Where, size_type _Size=1)
+	{
+		_Nodeptr temp = _Where;
+		for (; _Size; --_Size)
+			temp = temp->next;
+		return temp;
 	}
 
 	void merge(forward_list& _Right)
