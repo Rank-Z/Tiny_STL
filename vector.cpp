@@ -37,7 +37,7 @@ public:
 		last = elem + 4;
 	}
 
-	explicit vector(size_type s) :vector(s,0)//委托给 vector(int s,int value)，并填充为0
+	explicit vector(size_type s) :vector(s,0)
 	{ }
 
 	vector(size_type s, value_type value) //填充为value
