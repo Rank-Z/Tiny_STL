@@ -4,19 +4,20 @@
 #include<utility>//std::move()std::forward()
 #define _STD ::std::
 
+template<typename _Ty>
 class vector
 {
 
-	using reference = int & ;
-	using const_reference = const int &;
-	using iterator = int * ;
-	using const_iterator = const int *;
+	using reference = _Ty & ;
+	using const_reference = const _Ty &;
+	using iterator = _Ty * ;
+	using const_iterator = const _Ty *;
 	using size_type = unsigned ;//类似 size_t
-	using difference_type = int;
-	using value_type = int;
-	using allocator_type = _STD allocator<int>;
-	using pointer = int *;
-	using const_pointer=const int *;
+	using difference_type = _Ty;
+	using value_type = _Ty;
+	using allocator_type = _STD allocator<_Ty>;
+	using pointer = _Ty *;
+	using const_pointer=const _Ty *;
 
 private:
 	iterator elem = nullptr;//首地址				==beign()
@@ -29,7 +30,6 @@ public:
 	iterator& _end() { return space; }
 	iterator& _last() { return last; }
 
-public:
 	vector()
 	{
 		elem=alloc.allocate(4);
@@ -47,7 +47,7 @@ public:
 		space = last = elem + s;
 	}
 	
-	vector(const int *b,const int *c) 
+	vector(const _Ty *b,const _Ty *c) 
 	{
 		difference_type p_diff = c - b;
 		elem = alloc.allocate(p_diff);
@@ -58,7 +58,7 @@ public:
 		}
 	}
 
-	vector(_STD initializer_list<int> &il) :vector(il.begin(),il.end())//值列表 只返回const指针
+	vector(_STD initializer_list<_Ty> &il) :vector(il.begin(),il.end())//值列表 只返回const指针
 	{ }
 
 	vector(vector& v):vector(v.cbegin(),v.cend())
@@ -88,7 +88,7 @@ public:
 		return *this;
 	}
 
-	vector& operator=(_STD initializer_list<int> &li)
+	vector& operator=(_STD initializer_list<_Ty> &li)
 	{
 		int lsize = li.size();
 		if (lsize > last - elem)
