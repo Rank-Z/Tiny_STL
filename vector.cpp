@@ -1,6 +1,6 @@
 #include<initializer_list>//值列表类
 #include<memory>//allocator类	
-#include<stdexcept>//其中定义了几种常见的异常类
+#include<stdexcept>//用到其中几个异常类
 #include<utility>//std::move()std::forward()
 #define _STD ::std::
 
