@@ -4,7 +4,7 @@
 #include<utility>//std::move()std::forward()
 #define _STD ::std::
 
-template<typename _Ty>
+template<typename _Ty,class _Alloc=_STD allocator<_Ty>>
 class vector
 {
 
@@ -15,7 +15,7 @@ class vector
 	using size_type = unsigned ;//类似 size_t
 	using difference_type = _Ty;
 	using value_type = _Ty;
-	using allocator_type = _STD allocator<_Ty>;
+	using allocator_type =_Alloc;
 	using pointer = _Ty *;
 	using const_pointer=const _Ty *;
 
@@ -37,32 +37,45 @@ public:
 		last = elem + 4;
 	}
 
-	explicit vector(size_type s) :vector(s,0)
-	{ }
-
-	vector(size_type s, value_type value) //填充为value
+	explicit vector(const _Alloc& _Al) noexcept 
+	:vector(void)
 	{
-		elem = alloc.allocate(s);
-		_STD uninitialized_fill_n(elem, s, value);
-		space = last = elem + s;
+		alloc = _Al;
+	}
+
+	explicit vector(const size_type _Count,const _Alloc& _Al=_Alloc()) :vector(_Count,_Ty())
+	{
+		alloc = _Al;
+	}
+
+	vector(const size_type _Count,const value_type& _Val,const _Alloc& _Al=_Alloc()) //填充为value
+	{
+		alloc = _Al;
+		elem = alloc.allocate(_Count);
+		_STD uninitialized_fill_n(elem, _Count, value);
+		space = last = elem + _Count;
 	}
 	
-	vector(const _Ty *b,const _Ty *c) 
+	template<typename _Iter>
+	vector(const _Iter _First,const _Iter _Last,const _Alloc& _Al=_Alloc()) 
 	{
-		difference_type p_diff = c - b;
+		difference_type p_diff = _First - _Last;
 		elem = alloc.allocate(p_diff);
 		space = last = elem + p_diff;
 		for (int i = 0; elem + i != last; ++i)
 		{
-			*(elem + i) = *(b + i);
+			*(elem + i) = *(_First + i);
 		}
 	}
 
-	vector(_STD initializer_list<_Ty> &il) :vector(il.begin(),il.end())//值列表 只返回const指针
-	{ }
+	vector(_STD initializer_list<_Ty> &il) :vector(il.begin(),il.end()) //值列表 只返回const指针
+	{    }
 
-	vector(vector& v):vector(v.cbegin(),v.cend())
-	{ }
+	vector(const vector& _Right):vector(_Right.cbegin(),_Right.cend())
+	{    }
+
+	vector(const vector& _Right, const _Alloc& _Al) :vecetor(_Right.cbegin(), _Right.cend(), _Al)
+	{    }
 
 	~vector()
 	{
