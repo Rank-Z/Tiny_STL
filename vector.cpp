@@ -7,14 +7,13 @@
 template<typename _Ty,class _Alloc=_STD allocator<_Ty>>
 class vector
 {
-
+	using value_type = _Ty;
 	using reference = _Ty & ;
 	using const_reference = const _Ty &;
 	using iterator = _Ty * ;
 	using const_iterator = const _Ty *;
 	using size_type = unsigned ;//类似 size_t
 	using difference_type = _Ty;
-	using value_type = _Ty;
 	using allocator_type =_Alloc;
 	using pointer = _Ty *;
 	using const_pointer=const _Ty *;
@@ -29,6 +28,8 @@ public:
 	iterator& _first() { return elem; }
 	iterator& _end() { return space; }
 	iterator& _last() { return last; }
+	allocator_type& _allocator() { return alloc; }
+	void _allocator_reset() { alloc = allocator_type(); }
 
 	vector()
 	{
@@ -43,7 +44,7 @@ public:
 		alloc = _Al;
 	}
 
-	explicit vector(const size_type _Count,const _Alloc& _Al=_Alloc()) :vector(_Count,_Ty())
+	explicit vector(const size_type _Count,const _Alloc& _Al=_Alloc()) :vector(_Count,_Ty(),_Al)
 	{
 		alloc = _Al;
 	}
@@ -59,25 +60,57 @@ public:
 	template<typename _Iter>
 	vector(const _Iter _First,const _Iter _Last,const _Alloc& _Al=_Alloc()) 
 	{
-		difference_type p_diff = _First - _Last;
-		elem = alloc.allocate(p_diff);
-		space = last = elem + p_diff;
-		for (int i = 0; elem + i != last; ++i)
+		difference_type p_diff = _Last-_First;
+		if ( 4 < p_diff)
 		{
-			*(elem + i) = *(_First + i);
+			elem = alloc.allocate(p_diff);
+			last = elem + p_diff;
 		}
+		else
+		{
+			elem = alloc.allocate(4);
+			last = elem + 4;
+		}
+		for (int i = 0; _First != _Last; ++_First, ++i)
+			*(elem + i) = _First;
+		space = elem + p_diff;
 	}
 
-	vector(_STD initializer_list<_Ty> &il) :vector(il.begin(),il.end()) //值列表 只返回const指针
+	vector(_STD initializer_list<_Ty> &il,const _Alloc& _Al=_Alloc()) :vector(il.begin(),il.end(),_Al) //值列表 只返回const指针
 	{    }
 
-	vector(const vector& _Right):vector(_Right.cbegin(),_Right.cend())
+	vector(const vector& _Right):vector(_Right.cbegin(),_Right.cend(),_Right._allocator())
 	{    }
 
 	vector(const vector& _Right, const _Alloc& _Al) :vecetor(_Right.cbegin(), _Right.cend(), _Al)
 	{    }
 
-	~vector()
+	vector(vector&& _Right) noexcept
+	{
+		elem = _Right._first();
+		space = _Right._end();
+		last = _Right._last();
+		alloc = _STD move(_Right._allocator());
+
+		_Right._first() = pointer();
+		_Right._end() = pointer();
+		_Right._last() = pointer();
+		_Right._allocator_reset();
+	}
+
+	vector(vector&& _Right,const _Alloc& _Al)
+	{
+		elem = _Right._first();
+		space = _Right._end();
+		last = _Right._last();
+		alloc = _Al;
+
+		_Right._first() = pointer();
+		_Right._end() = pointer();
+		_Right._last() = pointer();
+	}
+
+	~vector() noexcept
 	{
 		for (auto p = elem; p != space; ++p)
 		{
@@ -152,7 +185,7 @@ public:
 
 	size_type size() const	//元素数目
 	{
-		return (space - elem);
+		return static_cast<unsigned>(space - elem);
 	}
 
 	bool empty()const
@@ -165,9 +198,9 @@ public:
 		return static_cast<unsigned>(last - elem);
 	}
 
-	void reserve(size_type n)
+	void reserve(size_type _Count)
 	{
-		iterator p = alloc.allocate((last - elem) + n);
+		iterator p = alloc.allocate((last - elem) + _Count);
 		for (int i = 0; elem + i != space; ++i)
 		{
 			*(p + i) = *(elem + i);
@@ -178,41 +211,41 @@ public:
 		}
 		alloc.deallocate(elem, (last - elem));
 		space = p + (space - elem);
-		last = p + (last - elem)+n;
+		last = p + (last - elem)+_Count;
 		elem = p;
 	}
 
-	void resize(size_type n)
+	void resize(size_type _Count)
 	{
 		value_type v;
-		resize(n, v);// !!! Some Complier don't allow to do this
+		resize(_Count, v);// !!! Some Complier don't allow to do this
 	}
 
-	void resize(size_type n, value_type value)
+	void resize(size_type _Count, value_type value)
 	{
-		if (n <= (last - elem))//n比原空间小
+		if (_Count <= (last - elem))//_Count比原空间小
 		{
-			for (int i = n; elem + i != last; ++i)
+			for (int i = _Count; elem + i != last; ++i)
 			{
 				alloc.destroy(elem + i);
 			}
-			alloc.deallocate(elem + n, (last - elem) - n);// !!!
-			(space - elem) <= n ? last = elem + n : last = space = elem + n;
+			alloc.deallocate(elem + _Count, (last - elem) - _Count);// !!!
+			(space - elem) <= _Count ? last = elem + _Count : last = space = elem + _Count;
 			for ( ; space != last; ++space)
 			{
 				alloc.construct(space, value);
 			}
 		}
-		else//n比原空间大
+		else//_Count比原空间大
 		{
-			iterator p = alloc.allocate(n);
+			iterator p = alloc.allocate(_Count);
 			for (int i = 0; elem + i != space; ++i)
 			{
 				*(p + i) = *(elem + i);
 				alloc.destroy(elem + i);
 			}
 			alloc.deallocate(elem, (last - elem));
-			last = p + n;
+			last = p + _Count;
 			space = p + (space - elem);
 			elem = p;
 			for (; space != last; ++space)
@@ -267,14 +300,14 @@ public:
 
 	//栈操作*****************************************************************************************
 
-	void push_back(value_type v)
+	void push_back(const value_type& _Val)
 	{
-		if (!(last - space))
-		{
-			reserve(last - elem);//扩容为原来大小的两倍，C++标准中并没有对此有明确规定，但是大部分C++实现都是如此
-		}
-		*space = v;
-		++space;
+		emplace_back(_Val);
+	}
+
+	void push_back(const value_type&& _Val)
+	{
+		emplace_back(_STD move(_Val));
 	}
 
 	void pop_back()
@@ -286,74 +319,86 @@ public:
 	template<typename ...Args>
 	void emplace_back(Args&&...args)
 	{
-		if (last - space == 0)
+		if (last==space)
+			reserve(capacity());
+		alloc.construct(space++, _STD forward<Args>(args)...);
+	}
+
+	template<typename ...Args>
+	iterator emplace_back(const_iterator _Where, Args&&...args)
+	{
+		if (_Where == space)
 		{
-			reserve(last - elem);
+			emplace_back(_STD forward<Args>(args)...);
+			return space - 1;
 		}
-		alloc.construct(space++, _STDforward<Args>(args)...);
+		else
+		{
+			const size_type p_diff = _Where - elem;
+			if (last == space)
+			{
+				pointer ptemp = alloc.allocator(2 * capacity());
+				for (int i = 0; elem + i != _Where; ++i)
+					alloc.construct(ptemp + i, *(elem + i));
+				alloc.construct(ptemp + p_diff, _STD forward<Args>(args)...);
+				for (int i = 0; _Where + i != space; ++i)
+					alloc.construct(ptemp + p_diff + i, *(_Where + i));
+				for (auto p = elem; p != space; ++p)
+					alloc.destroy(p);
+				alloc.deallocator(elem,last-elem);
+				space = ptemp + 1 + (space - elem);
+				last = ptemp + 2 * capacity();
+				elem = ptemp;
+				return ptemp + p_diff;
+			}
+			else
+			{
+				for (int i = 0; _Where + i != space; ++i)
+				{
+					alloc.construct(space - i, *(_Where + i));
+					alloc.destroy(_Where + i);
+				}
+				alloc.construct(_Where, _STD forward<Args>(args)...);
+				++space;
+				return _Where;
+			}
+		}
 	}
 
 	//列表操作*********************************************************************************************
 
-	iterator insert(iterator position, value_type &&v)//可以使用移动操作
+	iterator insert(const_iterator _Where, const value_type& _Val)
 	{
-		if (last - space)
-		{
-			iterator p = space - 1;
-			for (; p >= position; --p)
-			{
-				alloc.construct(p + 1, *p);
-				alloc.destroy(p);
-			}
-			alloc.construct(position, _STD move(v));
-			++last;
-			return position;
-		}
-		else
-		{
-			iterator p = alloc.allocate(2 * (last - elem));
-			difference_type dif = position - elem;
-			for (int i = 0; i!=dif; ++i)
-			{
-				alloc.construct(p + i, *(elem + i));
-				alloc.destroy(elem + i);
-			}
-			alloc.construct(p + (position - elem), _STD forward<value_type>(v));
-			for (; position != space; ++position)
-			{
-				alloc.construct(p + 1 + (position - elem), *(position));
-				alloc.destroy(position);
-			}
-			alloc.deallocate(elem, last - elem);
-			last = p + 2 * (last - elem);
-			space = p + 1 + (space - elem);
-			elem = p;
-			return p + dif;
-		}
+		return emplace(_Where, _Val);
 	}
 
-	iterator insert(iterator position, int n, value_type v)//不能使用移动，不能对同一对象移动两次，这里要求类型允许拷贝
+	iterator insert(const_iterator _Where, const value_type&& _Val)//可以使用移动操作
 	{
-		if (last - space >= n)
+		return emplace(_Where,_STD move(_Val));
+	}
+
+	iterator insert(iterator position,const size_type _Count,const value_type& _Val)//不能使用移动，不能对同一对象移动两次，这里要求类型允许拷贝
+	{
+		if (last - space >= _Count)
 		{
 			iterator p = space - 1;
 			for ( ; p >=position; --p)
 			{
-				alloc.construct(p + n, *p);
+				alloc.construct(p + _Count, *p);
 				alloc.destroy(p);
 			}
-			for (int i = 0; i != n; ++n)
+			for (int i = 0; i != _Count; ++_Count)
 			{
-				alloc.construct(position+i, v);
+				alloc.construct(position+i, _Val);
 			}
-			last += n;
+			last += _Count;
 			return position;
 		}
 		else
 		{
 			int rsize = 2*(last - elem);
 			difference_type dist = position - elem;
-			while (rsize < n+(space-elem))
+			while (rsize < _Count+(space-elem))
 			{
 				rsize *= 2;
 			}
@@ -363,26 +408,27 @@ public:
 				alloc.construct(tp + i, *(elem + i));
 				alloc.destroy(elem + i);
 			}
-			for (int i = 0; i != n; ++i)
+			for (int i = 0; i != _Count; ++i)
 			{
-				alloc.construct(tp + dist + i, v);
+				alloc.construct(tp + dist + i, _Val);
 			}
 			for ( ; position != space; ++position)
 			{
-				alloc.construct(tp + (position - elem) + n, *(position));
+				alloc.construct(tp + (position - elem) + _Count, *(position));
 				alloc.destroy(position);
 			}
 			alloc.deallocate(elem, space - elem);
 			last = tp + rsize;
-			space = tp + n + (last - elem);
+			space = tp + _Count + (last - elem);
 			elem = tp;
 			return tp + dist;
 		}
 	}
 
-	iterator insert(iterator position, iterator  begin, iterator  end)
+	template<typename Iter>
+	iterator insert(const_iterator position, Iter  _First, Iter  _Last)
 	{
-		size_type size = end-begin;
+		size_type size = _Last-_First;
 		if (last - space >= size)
 		{
 			iterator p = space - 1;
@@ -391,9 +437,9 @@ public:
 				alloc.construct(p + size, *p);
 				alloc.destroy(p);
 			}
-			for (; begin != end; ++begin)
+			for (; _First != _Last; ++_First)
 			{
-				alloc.construct(position++, *begin);
+				alloc.construct(position++, *_First);
 			}
 			return p + 1;
 		}
@@ -411,9 +457,9 @@ public:
 				alloc.construct(p + i, *(elem + i));
 				alloc.destroy(elem + i);
 			}
-			for (int i = position - elem; begin != end; ++begin,++i)
+			for (int i = position - elem; _First != _Last; ++_First,++i)
 			{
-				alloc.construct(p + i, *(begin));
+				alloc.construct(p + i, *(_First));
 			}
 			for (; position != space; ++position)
 			{
@@ -433,12 +479,60 @@ public:
 		return insert(position, (iterator)li.begin(), (iterator)li.end());
 	}
 
-	iterator earse(iterator p)
+	void assign(const size_type _Newsize, const value_type& _Val)
+	{
+		const size_type _Oldsize = size();
+		const size_type _Oldcapacity = capacity();
+
+		if (_Newsize > _Oldcapacity)
+		{
+			for (auto p = elem; p != space; ++p)
+				alloc.destroy(p);
+			alloc.deallocate(elem, last - elem);
+			iterator it = alloc.allocate(_Newsize);
+			elem = it;
+			last=space = elem + _Newsize;
+			for (; it != last; ++it)
+				alloc.construct(it, _Val);
+		}
+		else if (_Newsize > _Oldsize)
+		{
+			for (auto p = elem; p != space; ++elem)
+				*p = _Val;
+			for ( ; space - elem <= _Newsize; ++space)
+				alloc.construc(space, _Val);
+		}
+		else
+		{
+			const_iterator _Newspace = elem + _Newsize;
+			iterator temp = elem;
+			for ( ; temp != _Newspace; ++temp)
+				*(temp) = _Val;
+			for (; temp != space; ++temp)
+				alloc.destroy(temp);
+			space = _Newspace;
+		}
+	}
+
+	template<typename Iter>
+	void assign(Iter _First, Iter _Last)
+	{
+
+	}
+
+	void assign(_STD initializer_list<_Ty>il)
+	{
+		assign(il.begin(), il.end());
+	}
+
+
+
+	iterator earse(const_iterator p)
 	{
 		return earse(p, p+1);
 	}
 
-	iterator earse(iterator begin, iterator end )
+	iterator earse(const_iterator begin,const_iterator end )
 	{
 		for (int i = 0; begin + i != end; ++i)
 		{
@@ -520,7 +614,8 @@ public:
 
 };
 
-//void swap(vector &v1, vector& v2)//非成员版本的swap，在泛型编程中非常重要
-//{
-//	v1.swap(v2);
-//}
+template<typename _T1, typename _T2>
+void swap(vector<_T1> &v1, vector<_T2>& v2)
+{
+	v1.swap(v2);
+}
