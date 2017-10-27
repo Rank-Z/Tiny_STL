@@ -119,14 +119,14 @@ public:
 		alloc.deallocate(elem, last - elem);
 	}
 
-	vector& operator=(const vector&v)
+	vector& operator=(const vector& _Right)
 	{
-		int rsize = v.capacity();
+		int rsize = _Right.capacity();
 		clear();
 		alloc.deallocate(elem, last - elem);
 		elem = alloc.allocate(rsize);
 		space = elem;
-		for (iterator p = v.begin(); p != v.end(); ++p)
+		for (iterator p = _Right.begin(); p != _Right.end(); ++p)
 		{
 			alloc.construct(space++, *(p));
 		}
@@ -160,22 +160,32 @@ public:
 
 	//迭代器和指针********************************************************************************
 
-	iterator begin()const
+	iterator begin() const noexcept
 	{
 		return elem;
 	}
 
-	const iterator cbegin()const
+	const_iterator begin() const noexcept
 	{
 		return elem;
 	}
 
-	iterator end() const
+	const_iterator cbegin() const noexcept
+	{
+		return elem;
+	}
+
+	iterator end() const noexcept
 	{
 		return space;
 	}
 
-	const iterator cend()const
+	const_iterator end() const noexcept
+	{
+		return space;
+	}
+
+	const_iterator cend() const noexcept
 	{
 		return space;
 	}
@@ -183,74 +193,76 @@ public:
 
 	//大小和容量*************************************************************************************
 
-	size_type size() const	//元素数目
+	size_type size() const noexcept	//已有的元素数目
 	{
-		return static_cast<unsigned>(space - elem);
+		return static_cast<size_type>(space - elem);
 	}
 
-	bool empty()const
+	bool empty() const noexcept
 	{
-		return (begin()==end());
+		return (_first()==_end());
 	}
 
-	size_type capacity()const	//已分配的空间大小
+	size_type capacity() const noexcept	//已分配的空间大小
 	{
-		return static_cast<unsigned>(last - elem);
+		return static_cast<size_type>(last - elem);
 	}
 
-	void reserve(size_type _Count)
+	size_type max_size() const noexcept
 	{
-		iterator p = alloc.allocate((last - elem) + _Count);
+		int largenum = 9999;//depand on your system ,use to be a large number
+		return largenum;
+	}
+
+	void reserve(size_type _Newcapacity)
+	{
+		iterator p = alloc.allocate((last - elem) + _Newcapacity);
 		for (int i = 0; elem + i != space; ++i)
-		{
 			*(p + i) = *(elem + i);
-		}
 		for (iterator it = elem; it != space; ++it)
-		{
-			alloc.destroy(it);//析构容器中每个元素
-		}
+			alloc.destroy(it);
 		alloc.deallocate(elem, (last - elem));
 		space = p + (space - elem);
-		last = p + (last - elem)+_Count;
+		last = p + (last - elem)+_Newcapacity;
 		elem = p;
 	}
 
-	void resize(size_type _Count)
+	void resize(const size_type _Newsize)
 	{
 		value_type v;
-		resize(_Count, v);// !!! Some Complier don't allow to do this
+		resize(_Newsize, v);// !!! Some Complier don't allow to do this
 	}
 
-	void resize(size_type _Count, value_type value)
+	void resize(const size_type _Newsize,const value_type& _Val)
 	{
-		if (_Count <= (last - elem))//_Count比原空间小
+		if (_Newsize <= (last - elem))//_Count比原空间小
 		{
-			for (int i = _Count; elem + i != last; ++i)
+			for (int i = _Newsize; elem + i != last; ++i)
 			{
 				alloc.destroy(elem + i);
 			}
-			alloc.deallocate(elem + _Count, (last - elem) - _Count);// !!!
-			(space - elem) <= _Count ? last = elem + _Count : last = space = elem + _Count;
+			alloc.deallocate(elem + _Newsize, (last - elem) - _Count);// !!!
+			(space - elem) <= _Newsize ? last = elem + _Newsize : last = space = elem + _Newsize;
 			for ( ; space != last; ++space)
 			{
-				alloc.construct(space, value);
+				alloc.construct(space, _Val);
 			}
 		}
 		else//_Count比原空间大
 		{
-			iterator p = alloc.allocate(_Count);
+			iterator p = alloc.allocate(_Newsize);
 			for (int i = 0; elem + i != space; ++i)
 			{
 				*(p + i) = *(elem + i);
 				alloc.destroy(elem + i);
 			}
 			alloc.deallocate(elem, (last - elem));
-			last = p + _Count;
+			last = p + _Newsize;
 			space = p + (space - elem);
 			elem = p;
 			for (; space != last; ++space)
 			{
-				alloc.construct(space, value);
+				alloc.construct(space, _Val);
 			}
 		}
 	}
@@ -285,17 +297,35 @@ public:
 		return *(space - 1);
 	}
 
-	value_type& operator[](int n)const//这里没有将参数限制为无符号数，是想提供无边界检查的访问
+	pointer data() noexcept
 	{
-		return *(elem + n);
+		return elem;
 	}
 
-	value_type& at(int n)const
+	const_pointer data() noexcept
 	{
-		if (n<0 || n>(space - elem))
+		return elem;
+	}
+
+	value_type& operator[](const size_type _Pos)
+	{
+		return *(elem + _Pos);
+	}
+
+	value_type& at(const size_type _Pos)
+	{
+		if (_Pos<0 || _Pos>(space - elem))
 			throw _STD out_of_range("vector out of range");
 		else
-			return *(elem + n);
+			return *(elem + _Pos);
+	}
+
+	const value_type& at(const size_type _Pos) const
+	{
+		if (_Pos<0 || _Pos>(space - elem))
+			throw _STD out_of_range("vector out of range");
+		else
+			return *(elem + _Pos);
 	}
 
 	//栈操作*****************************************************************************************
@@ -517,7 +547,40 @@ public:
 	template<typename Iter>
 	void assign(Iter _First, Iter _Last)
 	{
+		const size_type _Oldsize = size();
+		const size_type _Oldcapacity = capacity();
+			  size_type _Newsize=0;
+		for (Iter it = _First; it != _Last; ++it)
+			++_Newsize;
 
+		if (_Newsize > _Oldcapacity)
+		{
+			for (auto p = elem; p != space; ++p)
+				alloc.destroy(p);
+			alloc.deallocate(elem, last - elem);
+			elem= alloc.allocate(_Newsize);
+			for (Iter p = _First, int i = 0; p != _Last; ++p, ++i)
+				alloc.construt(elem + i, *p);
+			last = space = elem + _Newsize;
+		}
+		else if (_Newsize > _Oldsize)
+		{
+			Iter it = _First;
+			for (auto p = elem; p != space; ++p,++it)
+				*(p) = *(it);
+			for ( ; it != _Last; ++it,++space)
+				alloc.construct(p, *(it));
+		}
+		else
+		{
+			Iter p = _First;
+			iterator temp = elem;
+			for ( ; p != _Last; ++p, ++temp)
+				*(temp) = *(p);
+			for ( ; temp != space; ++temp)
+				alloc.destroy(temp);
+			space = elem + _Newsize;
+		}
 	}
 
 	void assign(_STD initializer_list<_Ty>il)
@@ -527,24 +590,24 @@ public:
 
 
 
-	iterator earse(const_iterator p)
+	iterator earse(const_iterator _Where)
 	{
-		return earse(p, p+1);
+		return earse(_Where, _Where+1);
 	}
 
-	iterator earse(const_iterator begin,const_iterator end )
+	iterator earse(const_iterator _First,const_iterator _Last)
 	{
-		for (int i = 0; begin + i != end; ++i)
+		for (int i = 0; _First + i != _Last; ++i)
 		{
-			alloc.destroy(begin + i);
+			alloc.destroy(_First + i);
 		}
-		for (int i = 0; end + i != space; ++i)
+		for (int i = 0; _Last + i != space; ++i)
 		{
-			alloc.construct(begin + i, *(end + i));
-			alloc.destroy(end + i);
+			alloc.construct(_First + i, *(_Last + i));
+			alloc.destroy(_Last + i);
 		}
-		space = space - (end - begin);
-		return begin;
+		space = space - (_Last - _First);
+		return _First;
 	}
 
 	//比较与交换*********************************************************************************
@@ -595,27 +658,27 @@ public:
 		return !(operator<(v));
 	}
 
-	void swap(vector& v)
+	void swap(vector& _Right)
 	{
 		iterator t = _first();
-		_first() = v._first();
-		v._first() = t;
+		_first() = _Right._first();
+		_Right._first() = t;
 		
 		t = _end();
-		_end() = v._end();
-		v._end() = t;
+		_end() = _Right._end();
+		_Right._end() = t;
 
 		t = _last();
-		_last() = v._last();
-		v._last() = t;
+		_last() = _Right._last();
+		_Right._last() = t;
 	}
 
-	friend void swap(vector&v1, vector&v2);
+	friend void swap(vector&_Left, vector&_Right);
 
 };
 
 template<typename _T1, typename _T2>
-void swap(vector<_T1> &v1, vector<_T2>& v2)
+void swap(vector<_T1> &_Left, vector<_T2>& _Right)
 {
-	v1.swap(v2);
+	_Left.swap(_Right);
 }
