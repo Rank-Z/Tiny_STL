@@ -2,6 +2,7 @@
 #include<memory>//allocator类	
 #include<stdexcept>//用到其中几个异常类
 #include<utility>//std::move()std::forward()
+#include<xutility>
 #define _STD ::std::
 
 template<typename _Ty,class _Alloc=_STD allocator<_Ty>>
@@ -153,12 +154,10 @@ public:
 		return *this;
 	}
 
-	//以上为控制函数
-	/***********************************************************************************************************************************************************/
-	//功能函数
+	//***********************************************************************************************************************************************************/
 
 
-	//迭代器和指针********************************************************************************
+	//********************************************************************************
 
 	iterator begin() const noexcept
 	{
@@ -189,9 +188,10 @@ public:
 	{
 		return space;
 	}
+
 	//TODO:反序迭代器
 
-	//大小和容量*************************************************************************************
+	//*************************************************************************************
 
 	size_type size() const noexcept	//已有的元素数目
 	{
@@ -285,14 +285,24 @@ public:
 		space = elem;
 	}
 
-	//元素访问**************************************************************************************
+	//**************************************************************************************
 
-	value_type& front()const
+	value_type& front()
 	{
 		return *elem;
 	}
 
-	value_type& back()const
+	const value_type& front() const
+	{
+		return *elem;
+	}
+
+	value_type& back()
+	{
+		return *(space - 1);
+	}
+
+	const value_type& back() const
 	{
 		return *(space - 1);
 	}
@@ -328,7 +338,12 @@ public:
 			return *(elem + _Pos);
 	}
 
-	//栈操作*****************************************************************************************
+	allocator_type get_allocator() const noexcept
+	{
+		return (static_cast<allocator_type>alloc);
+	}
+
+	//*****************************************************************************************
 
 	void push_back(const value_type& _Val)
 	{
@@ -395,7 +410,7 @@ public:
 		}
 	}
 
-	//列表操作*********************************************************************************************
+	//*********************************************************************************************
 
 	iterator insert(const_iterator _Where, const value_type& _Val)
 	{
@@ -610,7 +625,7 @@ public:
 		return _First;
 	}
 
-	//比较与交换*********************************************************************************
+	//*******************************************************************************************
 
 	bool operator==(const vector& v)const
 	{
@@ -673,12 +688,63 @@ public:
 		_Right._last() = t;
 	}
 
-	friend void swap(vector&_Left, vector&_Right);
-
+	
 };
 
-template<typename _T1, typename _T2>
-void swap(vector<_T1> &_Left, vector<_T2>& _Right)
+template<typename _Ty,typename _Alloc>
+inline void swap(vector<_Ty, _Alloc>& _Left, vector<_Ty, _Alloc>& _Right)
 {
 	_Left.swap(_Right);
 }
+
+template<typename _Ty,typename _Alloc>
+inline bool operator==(const vector<_Ty, _Alloc>& _Left,const vector<_Ty, _Alloc>& _Right)
+{
+	return (_Left.size() == _Right.size() && 
+		_STD equal(_Left.begin(), _Left.end(), _Right.begin());
+}
+
+template<typename _Ty,typename _Alloc>
+inline bool operator!=(const vector<_Ty, _Alloc>& _Left, const vector<_Ty, _Alloc>& _Right)
+{
+	return (!(_Left == _Right));
+}
+
+template<typename _Ty,typename _Alloc>
+inline bool operator<(const vector<_Ty, _Alloc>& _Left, const vector<_Ty, _Alloc>& _Right)
+{
+	return (_STD lexicographical_compare(_Left.begin(), _Left.end(),
+		_Right.begin(), _Right.end()));
+}
+
+template<typename _Ty,typename _Alloc>
+inline bool operator>(const vector<_Ty, _Alloc>& _Left, const vector<_Ty, _Alloc>& _Right)
+{
+	return (_Right < _Left);
+}
+
+template<typename _Ty, typename _Alloc>
+inline bool operator<=(const vector<_Ty, _Alloc>& _Left, const vector<_Ty, _Alloc>& _Right)
+{
+	return (!(_Right < _Left));
+}
+
+template<typename _Ty, typename _Alloc>
+inline bool operator>=(const vector<_Ty, _Alloc>& _Left, const vector<_Ty, _Alloc>& _Right)
+{
+	return (!(_Left < _Right));
+}
+
+
+//TEMPLATE class vector<bool>
+//explicit partial specialization
+
+template<typename _Alloc>
+class vector<bool,_Alloc>
+{
+	using value_type = bool;
+	using reference = bool&;
+	using const_reference = const bool&;
+	//TODO:
+};
+
