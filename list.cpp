@@ -191,6 +191,14 @@ private:
 	{
 		(*node).next = node;
 		(*node).prev = node;
+		length = 0;
+	}
+
+	void _Delnode(iterator p)
+	{
+		(*static_cast<link_type>((*(p.node)).prev)).next = (*(p.node)).next;
+		(*static_cast<link_type>((*(p.node)).next)).prev = (*(p.node)).prev;
+		_Freenode(tmp);
 	}
 
 public:
@@ -247,7 +255,7 @@ public:
 
 	list(const list<_Ty>& _Right):list(_Right.begin(),_Right.end()){ }
 
-	list(const list<_Ty>&& _Right):length(_Right.length),node(_Buynode())
+	list(list<_Ty>&& _Right):length(_Right.length),node(_Buynode())
 	{
 		(*node).prev = (*(_Right.node)).prev;
 		(*node).next = (*(_Right.node)).next;
@@ -267,6 +275,35 @@ public:
 			it1 = it2;
 			++it2;
 		}
+	}
+
+	list<_Ty>& operator=(const list<_Ty>& _Right)
+	{
+		clear();
+		iterator first = node;
+		iterator second;
+		for (iterator it = _Right.begin(); it != _Right.end(); ++it)
+		{
+			second = _Buynode();
+			*second = *it;
+			(*(first.node)).next = second.node;
+			(*(second.node)).prev = first.node;
+			first = second;
+		}
+		(*(first.node)).next = node;
+		(*node).prev = first.node;
+		length = _Right.length;
+	}
+
+	lisg<_Ty>& operator==(list<_Ty>&& _Right)
+	{
+		clear();
+		(*node).next = (*_Right.node).next;
+		(*node).prev = (*_Right.node).prev;
+		(*static_cast<link_type>((*(_Right.node)).next)).prev = node;
+		(*static_cast<link_type>((*(_Right.node)).prev)).next = node;
+		length = _Right.length;
+		_Right._Reset();
 	}
 
 
@@ -455,8 +492,12 @@ public:
 
 	void clear()
 	{
-		for (iterator it = begin(); it != end(); ++it)
-			_Alloc::deallocate(it.node);
+		iterator d = begin();
+		for (iterator it = begin() + 1; it != end(); ++it)
+		{
+			_Freenode(d);
+			d = it;
+		}
 		_Reset();
 	}
 
@@ -470,10 +511,111 @@ public:
 		erase(--end());
 	}
 
+	void remove(const _Ty& _Val)
+	{
+		for (iterator it = begin(); it != end(); )
+		{
+			if (*it == _Val)
+			{
+				iterator tmp = it;
+				++it;
+				_Delnode(tmp);
+			}
+			else
+				++it;
+		}
+	}
 
+	template<typename _Pr>
+	void remove_if(_Pr _Pred)
+	{
+		for (iterator it = begin(); it != end(); )
+		{
+			if (_Pred(*it))
+			{
+				iterator tmp = it;
+				++it;
+				_Delnode(tmp);
+			}
+			else
+				++it;
+		}
+	}
 
+	void unique()
+	{
+		iterator first = begin();
+		iterator second = begin() + 1;
+		for (; second != end();)
+		{
+			if (*first == *second)
+			{
+				iterator it = second;
+				++second;
+				_Delnode(it);
+			}
+			++first;
+			++second;
+		}
+	}
 
+	template<typename _Pr>
+	void remove_id(_Pr _Pred)
+	{
+		iterator first = begin();
+		iterator second = begin() + 1;
+		for (; second != end();)
+		{
+			if (_Pred(*first,*second))
+			{
+				iterator it = second;
+				++second;
+				_Delnode(it);
+			}
+			++first;
+			++second;
+		}
+	}
 
+	void merge(list<_Ty>& _Right)
+	{
 
+	}
 
+	template<typename _Pr>
+	void merge(list<_Ty>& _Right, _Pr _Pred)
+	{
+
+	}
+
+	void sort()
+	{
+
+	}
+
+	template<typename _Pr>
+	void sort(_Pr _Pred)
+	{
+
+	}
+
+	void reverse()
+	{
+
+	}
+
+	void splice(iterator _Pos, list<_Ty>& _Right)
+	{
+
+	}
+
+	void splice(iterator _Pos, list<_Ty>& _Right, iterator _Which)
+	{
+
+	}
+
+	void splice(iterator _Pos, list<_Ty>& _Right, iterator _From, iterator _End)
+	{
+
+	}
 };
