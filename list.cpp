@@ -1,4 +1,8 @@
 #include<memory>
+#include<vector>
+#include<algorithm>
+#include<utility>
+#include<xutility>
 #define _STD ::std::
 
 template<typename _Ty>struct _list_iterator;
@@ -10,6 +14,11 @@ struct _list_node
 	void* next;
 	void* prev;
 	_Ty data;
+
+	_list_node() = default;
+
+	template<typename ..._Args>
+	_list_node(_Args..._args):data(_STD forward<_Args>(_args)) {   }
 };
 
 template<typename _Ty>
@@ -151,6 +160,12 @@ struct simple_alloc
 		return new _Ty;
 	}
 
+	template<typename ..._Args>
+	static pointer allocate(_Args..._args)
+	{
+		return new _Ty(_STD forward<_Args>(_args));
+	}
+
 	static void deallocate(pointer p)
 	{
 		delete p;
@@ -198,7 +213,7 @@ private:
 	{
 		(*static_cast<link_type>((*(p.node)).prev)).next = (*(p.node)).next;
 		(*static_cast<link_type>((*(p.node)).next)).prev = (*(p.node)).prev;
-		_Freenode(tmp);
+		_Freenode(p.node);
 	}
 
 public:
@@ -295,7 +310,7 @@ public:
 		length = _Right.length;
 	}
 
-	lisg<_Ty>& operator==(list<_Ty>&& _Right)
+	list<_Ty>& operator==(list<_Ty>&& _Right)
 	{
 		clear();
 		(*node).next = (*_Right.node).next;
@@ -439,6 +454,21 @@ public:
 		insert(begin(), _Val);
 	}
 
+	template<typename ..._Args>
+	void emplace_front(_Args..._args)
+	{
+		link_type p = list_node_allocator::allocate(_STD forward<_Args>(_args));
+		iterator it(p);
+
+		(*(it.node)).prev = node;
+		(*(it.node)).next = (*node).next;
+
+		(*static_cast<link_type>((*node).next)).prev = it.node;
+		(*node).next = it.node;
+
+		++length;
+	}
+
 	void push_back(const _Ty& _Val)
 	{
 		insert(node, _Val);
@@ -579,43 +609,199 @@ public:
 
 	void merge(list<_Ty>& _Right)
 	{
-
+		iterator it1 = begin();
+		iterator it2 = _Right.begin();
+		for (; it1 != end() || it2 != _Right.end();)
+		{
+			if (*it2 < *it1)
+			{
+				iterator tmp = it2;
+				++it2;
+				(*(tmp.node)).prev = (*(it1.node)).prev;
+				(*(tmp.node)).next = it.node;
+				(*static_cast<link_type>((*(it1.node)).prev)).next = tmp.node;
+				(*(it1.node)).prev = tmp.node;
+			}
+			else
+				++it1;
+		}
+		if (it2 != _Right.end())
+		{
+			iterator last = --end();
+			(*(it2.node)).prev = last.node;
+			(*(last.node)).next = it2.node;
+			it2 = --_Right.end();
+			(*(it2.node)).next = node;
+			(*node).prev = it2.node;
+		}
+		length += _Right.length;
+		_Right._Reset();
 	}
 
 	template<typename _Pr>
 	void merge(list<_Ty>& _Right, _Pr _Pred)
 	{
-
+		iterator it1 = begin();
+		iterator it2 = _Right.begin();
+		for (; it1 != end() || it2 != _Right.end();)
+		{
+			if (_Pred(*it1,*it2))
+			{
+				iterator tmp = it2;
+				++it2;
+				(*(tmp.node)).prev = (*(it1.node)).prev;
+				(*(tmp.node)).next = it.node;
+				(*static_cast<link_type>((*(it1.node)).prev)).next = tmp.node;
+				(*(it1.node)).prev = tmp.node;
+			}
+			else
+				++it1;
+		}
+		if (it2 != _Right.end())
+		{
+			iterator last = --end();
+			(*(it2.node)).prev = last.node;
+			(*(last.node)).next = it2.node;
+			it2 = --_Right.end();
+			(*(it2.node)).next = node;
+			(*node).prev = it2.node;
+		}
+		length += _Right.length;
+		_Right._Reset();
 	}
 
 	void sort()
 	{
-
+		_STD vector<_Ty> v{begin(), end()};
+		_STD sort(v.begin(),v.end());
+		list<_Ty> lt(v.begin(), v.end());
+		*this = _STD move(lt);
 	}
 
 	template<typename _Pr>
 	void sort(_Pr _Pred)
 	{
-
+		_STD vector<_Ty> v{ begin(), end() };
+		_STD sort(v.begin(), v.end(),_Pred);
+		list<_Ty> lt(v.begin(), v.end());
+		*this = _STD move(lt);
 	}
 
-	void reverse()
+	void reverse() noexcept 
 	{
+		const_iterator _Node = node;
+		iterator _now = node;
 
+		for (; ; )
+		{
+			const iterator _next = (*(_now.node)).next;
+			(*(_now.node)).next = (*(_now.node)).prev;
+			(*(_now.node)).prev = _next.node;
+			
+			if (_next == _Node)
+				break;
+			_now = _next;
+		}
 	}
 
 	void splice(iterator _Pos, list<_Ty>& _Right)
 	{
+		if (_Right.size() == 0) return;
 
+		(*(_Right.begin().node)).prev = (*(_Pos.node)).prev;
+		(*static_cast<link_type>((*(_Right.node)).prev)).next = node;
+
+		(*static_cast<link_type>((*(_Pos.node)).prev)).next = _Right.begin().node;
+		(*(_Pos.node)).prev = (*(_Right.node)).prev;
+
+		length += _Right.length;
+		_Right._Reset();
 	}
 
 	void splice(iterator _Pos, list<_Ty>& _Right, iterator _Which)
 	{
+		if (_Right.end() == _Which) return;
 
+		(*static_cast<link_type>((*(_Which.node)).prev)).next = (*(_Which.node)).next;
+		(*static_cast<link_type>((*(_Which.node)).next)).prev = (*(_Which.node)).prev;
+
+		(*(_Which.node)).prev = (*(_Pos.node)).prev; 
+		(*(_Which.node)).next = _Pos.node;
+
+		(*static_cast<link_type>((*(_Pos.node)).prev)).next = _Which.node;
+		(*(_Pos.node)).prev = _Which.node;
+
+		++length;
+		--_Right.length;
 	}
 
 	void splice(iterator _Pos, list<_Ty>& _Right, iterator _From, iterator _End)
 	{
+		if (_From == _End) return;
 
+		int _count = 0;
+		for (iterator it = _From; it != _End; ++it)
+		{
+			++_count;
+		}
+		length += _count;
+		_Right.length -= _count;
+
+		iterator _last = _End - 1;
+
+		(*static_cast<link_type>((*(_From.node)).prev)).next = _End.node;
+		(*(_End.node)).prev = (*(_From.node)).prev;
+
+		(*(_From.node)).prev = (*(_Pos.node)).prev;
+		(*(_last.node)).next = _Pos.node;
+
+		(*static_cast<link_type>((*(_Pos.node)).prev)).next = _From.node;
+		(*(_Pos.node)).prev = _last.node;
 	}
 };
+
+template<typename _Ty>
+inline bool operator==(const list<_Ty>& _Left, const list<_Ty>& _Right)
+{
+	if (_Left.size() != _Right.size()) return false;
+
+	list<_Ty>::iterator it_L = _Left.begin();
+	list<_Ty>::iterator it_R = _Right.begin();
+
+	for (; it_L != _Left.end(); ++it_L, ++it_R)
+	{
+		if ((*it_L) != (*it_R))
+			return false;
+	}
+	return true;
+}
+
+template<typename _Ty>
+inline bool operator!=(const list<_Ty>& _Left, const list<_Ty>& _Right)
+{
+	return !(_Left == _Right);
+}
+
+template<typename _Ty>
+inline bool operator<(const list<_Ty>& _Left, const list<_Ty>& _Right)
+{
+	return _STD lexicographical_compare(_Left.begin(), _Left.end(), _Right.begin(), _Right.end());
+}
+
+template<typename _Ty>
+inline bool operator>(const list<_Ty>& _Left, const list<_Ty>& _Right)
+{
+	return _Right < _Left;
+}
+
+template<typename _Ty>
+inline bool operator<=(const list<_Ty>& _Left, const list<_Ty>& _Right)
+{
+	return !(_Left > _Right);
+}
+
+template<typename _Ty>
+inline bool operator>=(const list<_Ty>& _Left, const list<_Ty>& _Right)
+{
+	return !(_Left<_Right);
+}
