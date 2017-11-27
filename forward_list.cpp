@@ -2,6 +2,7 @@
 #include<initializer_list>
 #include<utility>
 #define _STD ::std::
+
 template<typename _Ty>
 struct _Node
 {
@@ -9,14 +10,13 @@ struct _Node
 	_Ty val;
 
 	template<typename..._Args>
-	_Node(_Node* n, _Args&&..._args) :next(n), val(_STD forward<_Args>(_args)...)
+	_Node(_Node* p, _Args&&..._args) :next(p), val(_STD forward<_Args>(_args)...)
 	{   }
 };
 
 
-
 template<typename _Ty>
-class _forward_list_const_iterator
+struct _forward_list_const_iterator
 {
 	using value_type = _Ty;
 	using pointer = value_type*;
@@ -26,14 +26,14 @@ class _forward_list_const_iterator
 	using difference_type = int;
 	using _Nodeptr = _Node<_Ty>*;
 
-protected:
+
 	_Nodeptr node;
 
-public:
+
 	_forward_list_const_iterator() = default;
-	_forward_list_const_iterator(void* p):node(static_cast<_Nodeptr>(p))
+	_forward_list_const_iterator(void* p) :node(static_cast<_Nodeptr>(p))
 	{   }
-	_forward_list_const_iterator(const _forward_list_const_iterator<_Ty>& _Right):node(_Right.node)
+	_forward_list_const_iterator(const _forward_list_const_iterator<_Ty>& _Right) :node(_Right.node)
 	{   }
 
 	bool operator==(const _forward_list_const_iterator& _Right)
@@ -66,7 +66,7 @@ public:
 };
 
 template<typename _Ty>
-class _forward_list_iterator:public _forward_list_const_iterator<_Ty>
+struct _forward_list_iterator :public _forward_list_const_iterator<_Ty>
 {
 	using value_type = _Ty;
 	using pointer = value_type*;
@@ -76,11 +76,11 @@ class _forward_list_iterator:public _forward_list_const_iterator<_Ty>
 	using difference_type = int;
 	using _Nodeptr = _Node<_Ty>*;
 
-public:
+
 	_forward_list_iterator() = default;
-	_forward_list_iterator(void* p):node(static_cast<_Nodeptr>(p))
+	_forward_list_iterator(void* p) :node(static_cast<_Nodeptr>(p))
 	{   }
-	_forward_list_iterator(const _forward_list_const_iterator<_Ty>& _Right):node(_Right.node)
+	_forward_list_iterator(const _forward_list_const_iterator<_Ty>& _Right) :node(_Right.node)
 	{   }
 
 	reference operator*()
@@ -113,7 +113,7 @@ class forward_list
 	using size_type = unsigned;
 	using difference_type = int;
 	using allocator_type = _STD allocator<_Node<_Ty>>;
-	using _Nodeptr = _Node*;
+	using _Nodeptr = _Node<_Ty>*;
 	using const_Nodeptr = const _Nodeptr;
 
 private:
@@ -132,9 +132,9 @@ public:
 	forward_list(const forward_list& _Right)
 	{
 		_Nodeptr Rp = _Right.begin();
-		if(Rp):
+		if (Rp) :
 		{
-			_Nodeptr temp =_BuyNode(nullptr, Rp->val);
+			_Nodeptr temp = _BuyNode(nullptr, Rp->val);
 			_Head = temp;
 			Rp = Rp->next;
 		}
@@ -157,7 +157,7 @@ public:
 		_Head = _Construct_from_end(nullptr, begin, end);
 	}
 
-	forward_list(_STD initializer_list<_Ty> il):forward_list(il.begin(),il.end())
+	forward_list(_STD initializer_list<_Ty> il) :forward_list(il.begin(), il.end())
 	{   }
 
 	forward_list& operator=(const forward_list& _Right)
@@ -180,6 +180,7 @@ public:
 
 	forward_list& operator=(forward_list<_Ty>&& _Right)
 	{
+		_Clear_n(_Head);
 		_Head = _STD move(_Right._GetHead());
 		return *this;
 	}
@@ -196,7 +197,7 @@ public:
 		_Clear_n(_Head);
 	}
 
-/***********************************************************************************************/
+	/***********************************************************************************************/
 private:
 	void _Construct_n(size_type _Size, const _Ty& _Val)
 	{
@@ -207,9 +208,9 @@ private:
 	}
 
 	template<typename..._Args>
-	_Nodeptr _BuyNode(_Nodeptr addr,_Args&&..._args)
+	_Nodeptr _BuyNode(_Nodeptr addr, _Args&&..._args)
 	{
-		return new _Node(addr,_STD forward(_args)...);
+		return new _Node(addr, _STD forward(_args)...);
 	}
 
 	void _Clear_n(_Nodeptr _Where)
@@ -220,7 +221,7 @@ private:
 	}
 
 	template<typename Iter>
-	_Nodeptr _Construct_from_end(_Nodeptr _Where,Iter begin, Iter end)
+	_Nodeptr _Construct_from_end(_Nodeptr _Where, Iter begin, Iter end)
 	{
 		//assuem Iter support operator -- and begin is always less than end
 		_Nodeptr temp = _Where->next;
@@ -242,9 +243,10 @@ private:
 	_Nodeptr _Before_end()
 	{
 		_Node_poninter temp = _Head;
-		if(temp)
-			for( ;temp->next;temp=temp->next)
-			{   }
+		if (temp)
+			for (; temp->next; temp = temp->next)
+			{
+			}
 		return temp;
 	}
 
@@ -261,20 +263,20 @@ private:
 		return temp;
 	}
 
-	struct less 
+	_Nodeptr& _GetHead()
+	{
+		return this->_Head;
+	}
+
+	struct less
 	{
 		bool operator()(_Nodeptr _Left, _Nodeptr _Right)
 		{
 			return _Left->val < _Right->val;
 		}
 	};
-/************************************************************************************************/
+	/************************************************************************************************/
 public:
-
-	_Nodeptr& _GetHead()
-	{
-		return this->_Head;
-	}
 
 	iterator begin()const
 	{
@@ -311,41 +313,41 @@ public:
 	}
 
 	template<typename..._Args>
-	_Nodeptr _Insert_after(_Nodeptr _Where, _Args&&..._args)
+	_Nodeptr _Insert_after(const_iterator _Where, _Args&&..._args)
 	{
-		return _BuyNode(_Where->next,_STD forward(_args)...);
+		return _BuyNode(_Where.node->next, _STD forward(_args)...);
 	}
 
-	iterator insert_after(const _Nodeptr _Where, const _Ty& _Val)
+	iterator insert_after(const_iterator _Where, const _Ty& _Val)
 	{
-		return _Where->next=_Insert_after(_Where, _Val);
+		return _Where.node->next = _Insert_after(_Where, _Val);
 	}
 
-	iterator insert_after(const _Nodeptr _Where, const size_type _Count, const _Ty& _Val)
+	iterator insert_after(const_iterator _Where, const size_type _Count, const _Ty& _Val)
 	{
 		_Nodeptr temp = _Where->next;
 		for (int i = 0; i != _Count, ++i)
 		{
 			temp = _Insert_after(temp, _Val);
 		}
-		return _Where->next=temp;
+		return _Where.node->next = temp;
 	}
 
 	template<typename Iter>
-	iterator insert_after(const _Nodeptr _Where, Iter begin, Iter end)
+	iterator insert_after(const_iterator _Where, Iter begin, Iter end)
 	{
-		return _Where->next= _Construct_from_end(_Where, begin, end);
+		return _Where.node->next = _Construct_from_end(_Where.node, begin, end);
 	}
 
-	iterator insert_after(const _Nodeptr _Where, _STD initializer_list<_Ty> il)
+	iterator insert_after(const_iterator _Where, _STD initializer_list<_Ty> il)
 	{
 		return insert_after(_Where, il.begin(), il.end());
 	}
 
 	template<typename..._Args>
-	iterator emplace_after(const _Nodeptr _Where, _Args&&..._args)
+	iterator emplace_after(const_iterator _Where, _Args&&..._args)
 	{
-		return _Where->next = _Insert_after(_Where, _STD forward(_args)...);
+		return _Where.node->next = _Insert_after(_Where, _STD forward(_args)...);
 	}
 
 	void assign(_STD initializer_list<_Ty> il)
@@ -357,7 +359,7 @@ public:
 	void assign(Iter begin, Iter end)
 	{
 		_Clear_n(_Head);
-		_Head = _Construct_from_end(nullptr,begin, end);
+		_Head = _Construct_from_end(nullptr, begin, end);
 	}
 
 	void assign(size_type _Count, const _Ty& _Val)
@@ -372,13 +374,13 @@ public:
 		if (_Cursize < _Newsize)
 		{
 			_Nodeptr temp = nullptr;
-			for (int i = _Newsize - _Cursize;0<i; --i)
+			for (int i = _Newsize - _Cursize; 0<i; --i)
 			{
 				temp = _BuyNode(temp);
 			}
 			_Before_end->next = temp;
 		}
-		else if(_Newsize<_Cursize)
+		else if (_Newsize<_Cursize)
 		{
 			_Nodeptr temp = _Head;
 			for (; 0 < _Newsize; --_Newsize)
@@ -402,49 +404,54 @@ public:
 		}
 	}
 
-	iterator before_begin()const
+	iterator before_begin()noexcept
 	{
-		return new _Node(_Head);
+		return _Head;
 	}
 
-	const_iterator cbefore_begin()const
+	const_iterator before_begin() const noexcept
 	{
-		return new _Node(_Head);
+		return _Head;
 	}
 
-	iterator erase_after(const_Nodeptr _Where)
+	const_iterator cbefore_begin()const noexcept
 	{
-		if (_Where == nullptr)
+		return _Head;
+	}
+
+	iterator erase_after(const_iterator _Where)
+	{
+		if (_Where.node == nullptr)
 		{
 			return nullptr;
 		}
-		if (_Where->next)
+		if (_Where.node->next)
 		{
-			_Nodeptr temp = _Where->next->next;
-			_Freenode(_Where->next);
-			return _Where->next = temp;
+			_Nodeptr temp = _Where.node->next->next;
+			_Freenode(_Where.node->next);
+			return _Where.node->next = temp;
 		}
 		return nullptr;
 	}
 
-	iterator erase_after(const_Nodeptr _First, const_Nodeptr _Last)//earse elements between _First and _Last
+	iterator erase_after(const_iterator _First, const_iterator _Last)//earse elements between _First and _Last
 	{
-		if (!_First)
+		if (!_First.node)
 			return nullptr;
-		if (_First == _Head&&_Last == nullptr)
+		if (_First.node == _Head&&_Last.node == nullptr)
 		{
 			clear();
 		}
 		else
 		{
-			_Nodeptr temp = _First->next;
+			_Nodeptr temp = _First.node->next;
 			_Nodeptr next;
-			for (; temp!=_Last;temp=next)
+			for (; temp != _Last.node; temp = next)
 			{
 				next = temp->next;
 				_Freenode(temp);
 			}
-			_First->next = _Last;
+			_First.node->next = _Last.node;
 		}
 		return _Last;
 	}
@@ -465,7 +472,7 @@ public:
 	{
 		if (this != &_Right)
 		{
-			_Nodeptr temp=_Head;
+			_Nodeptr temp = _Head;
 			_Head = _Right._GetHead();
 			_Right._GetHead() = _Head;
 		}
@@ -518,7 +525,7 @@ public:
 		if (_Nodeptr _First = begin())
 		{
 			_Nodeptr _After = _First->next;
-			for ( ; _After != end(); )
+			for (; _After != end(); )
 				if (_First->val == _After->val)
 					_After = erase_after(_First);
 				else
@@ -536,7 +543,7 @@ public:
 		{
 			_Nodeptr _After = _First->next;
 			for (; _After != end(); )
-				if (_Pred(_First->val,_After->val))
+				if (_Pred(_First->val, _After->val))
 					_After = erase_after(_First);
 				else
 				{
@@ -548,17 +555,17 @@ public:
 
 	void sort()
 	{
-		_Sort(before_begin(), end(),less);
+		_Sort(before_begin().node, end(), less);
 	}
 
 	template<typename _Pr>
 	void sort(_Pr _Pred)
 	{
-		_Sort(before_begin(), end(), _Pred);
+		_Sort(before_begin().node, end(), _Pred);
 	}
 
 	template<typename _Pr>
-		void _Sort(_Nodeptr _Before_first, _Nodeptr _Last,_Pr _Pred)
+	void _Sort(_Nodeptr _Before_first, _Nodeptr _Last, _Pr _Pred)
 	{
 		size_type _Size = 0;
 		for (_Nodeptr t = _Before_first->next; t != _Last; ++_Size)
@@ -577,7 +584,7 @@ public:
 
 		for (;;)
 		{
-			if (_Pred(_Mid->next,_First->next))
+			if (_Pred(_Mid->next, _First->next))
 			{
 				splice_after(_Before_first, *this, _Before_mid);
 				_Before_first = _Before_first->next;
@@ -602,7 +609,7 @@ public:
 
 	void merge(forward_list&& _Right)
 	{
-		merge(_Right,less);
+		merge(_Right, less);
 	}
 
 	template<typename _Pr>
@@ -610,7 +617,7 @@ public:
 	{
 		_Nodeptr _L = begin();
 		_Nodeptr _R = _Right.begin();
-		if (_Pred(_R->val,_L->val))
+		if (_Pred(_R->val, _L->val))
 		{
 			_Head = _R;
 			_R = _R->next;
@@ -623,7 +630,7 @@ public:
 		_Nodeptr temp = _Head
 			for (; _L&&_R; temp = temp->next)
 			{
-				if (_Pred(_R->val,_L->val))
+				if (_Pred(_R->val, _L->val))
 				{
 					temp->next = _R;
 					_R = _R->next;
@@ -648,10 +655,10 @@ public:
 		merge(_Right, _Pred);
 	}
 
-	void _Splice_after(const_Nodeptr _Where,
-		forward_list& _Right, const_Nodeptr _First, const_Nodeptr _Last)
+	void _Splice_after(_Nodeptr _Where,
+		forward_list& _Right, _Nodeptr _First, _Nodeptr _Last)
 	{
-		if (_First == _Last || _First->next==_Last)
+		if (_First == _Last || _First->next == _Last)
 			return;
 		_Nodeptr _begin = _First->next;
 		if (_First->next == _Right.begin())
@@ -665,34 +672,34 @@ public:
 		_Where->next = _begin;
 	}
 
-	void splice_after(const_Nodeptr _Where, forward_list& _Right)
+	void splice_after(const_iterator _Where, forward_list& _Right)
 	{
-		_Splice_after(_Where, _Right, _Right.before_begin(), _Right.end());
+		_Splice_after(_Where.node, _Right, _Right.before_begin().node, _Right.end().node);
 	}
 
-	void splice_after(const_Nodeptr _Where, forward_list&& _Right)
+	void splice_after(const_iterator _Where, forward_list&& _Right)
 	{
-		_Splice_after(_Where, _Right, _Right.before_begin(), _Right.end());
+		_Splice_after(_Where.node, _Right, _Right.before_begin().node, _Right.end().node);
 	}
 
-	void splice_after(const_Nodeptr _Where, forward_list& _Right, const_Nodeptr _First)
+	void splice_after(const_iterator _Where, forward_list& _Right, const_iterator _First)
 	{
-		_Splice_after(_Where, _Right, _First, _Right.end());
+		_Splice_after(_Where.node, _Right, _First.node, _Right.end().node);
 	}
 
-	void splice_after(const_Nodeptr _Where, forward_list&& _Right, const_Nodeptr _First)
+	void splice_after(const_iterator _Where, forward_list&& _Right, const_iterator _First)
 	{
-		_Splice_after(_Where, _Right, _First, _Right.end());
+		_Splice_after(_Where.node, _Right, _First.node, _Right.end().node);
 	}
 
-	void splice_after(const_Nodeptr _Where, forward_list& _Right, const_Nodeptr _First, const_Nodeptr _Last)
+	void splice_after(const_iterator _Where, forward_list& _Right, const_iterator _First, const_iterator _Last)
 	{
-		_Splice_after(_Where, _Right, _First, _Last);
+		_Splice_after(_Where.node, _Right, _First.node, _Last.node);
 	}
 
-	void splice_after(const_Nodeptr _Where, forward_list&& _Right, const_Nodeptr _First, const_Nodeptr _Last)
+	void splice_after(const_iterator _Where, forward_list&& _Right, const_iterator _First, const_iterator _Last)
 	{
-		_Splice_after(_Where, _Right, _First, _Last);
+		_Splice_after(_Where.node, _Right, _First.node, _Last.node);
 	}
 
 	void reverse() noexcept
