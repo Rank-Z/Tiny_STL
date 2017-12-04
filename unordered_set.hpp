@@ -202,6 +202,7 @@ _Member_Data_End_
 	}
 };
 
+
 template<	typename Key,
 	typename Hash = _STD hash<Key>,
 	typename Pred = _STD equal_to<Key>,
@@ -246,7 +247,9 @@ _Member_Data_End_
 
 	nodeptr _buynode(const Key& key,nodeptr n,nodeptr p)
 	{
-		return _alloc.construct(_alloc.allocate(1), _STD forward<Key>(key),n,p);
+		nodeptr ret = _alloca.allocate(1);
+		_alloc.construct(ret, _STD forward<Key>(key), n, p);
+		return ret;
 	}
 
 	nodeptr _insert(const Key& key)
@@ -335,7 +338,7 @@ _Member_Data_End_
 		size_type hv = _makehash(key);
 		nodeptr np = _buckets[hv];
 		for (; np&&_makehash(np->key) == hv;)
-			if (np->key == key)
+			if (_eql(np->key,key))
 				return np;
 		return nullptr; 
 	}
@@ -357,6 +360,19 @@ _Member_Data_End_
 		}
 		if (_last == where)
 			_last = where->prev;
+		size_t hv = _makehash(where->key);
+		if (_buckets[hv] == where)
+		{
+			if (where->next)
+			{
+				if (hv == _makehash(where->next->key))
+					_buckets[hv] = where->next;
+				else
+					_buckets[hv] = nullptr;
+			}
+			else
+				_buckets[hv] = nullptr;
+		}
 		_freenode(where);
 		--_size;
 	}
@@ -511,8 +527,6 @@ public:
 		_head = _Right._head;
 		_last = _Right._last;
 
-		_Right.clear();
-
 		return *this;
 	}
 
@@ -657,7 +671,7 @@ public:
 	iterator emplace_hint(const_iterator hint, Args&&... args)
 	{
 		Key k(Args..args);
-		if (*hint == k)
+		if (_eql(*hint,k))
 			return hint;
 
 		return _insert(k);
@@ -731,19 +745,13 @@ public:
 
 	void clear() noexcept
 	{
-		for (auto&t : _buckets)
+		for (nodeptr np = _buckets[_head]; np;)
 		{
-			if (t)
-			{
-				for (nodeptr np = t; np;)
-				{
-					nodeptr tmp = np;
-					np = np->next;
-					delete tmp;
-				}
-			}
-			t = nullptr;
+			nodeptr tmp = np->next;
+			_freenode(np);
+			np = tmp;
 		}
+		_buckets.clear();
 		_size = 0;
 		_last = nullptr;
 	}
@@ -887,3 +895,256 @@ template<typename Key,
 {
 	_Left.swap(_Right);
 }
+
+
+template<	typename Key,
+	typename Hash = _STD hash<Key>,
+	typename Pred = _STD equal_to<Key>,
+	typename Alloc = _STD allocator<uset_node<Key>>>
+	class unordered_multiset
+{
+public:
+	using key_type = Key;
+	using value_type = key_type;
+	using hasher = Hash;
+	using key_equal = Pred;
+	using allocator_type = Alloc;
+	using node = uset_node<Key>;
+	using nodeptr = node*;
+	using pointer = typename _STD allocator_traits<Alloc>::pointer;				//just value_type*
+	using const_pointer = typename _STD allocator_traits<Alloc>::const_pointer;	//just const value_type*
+	using reference = value_type&;
+	using const_reference = const value_type&;
+	using size_type = size_t;
+	using difference_type = ptrdiff_t;
+	using iterator = uset_iterator<Key>;
+	using const_iterator = uset_const_iterator<Key>;
+	using local_iterator = iterator;
+	using const_local_iterator = const_iterator;
+
+private:
+_Member_Data_Start_
+	_STD vector<nodeptr> _buckets;
+	size_t _size = 0;
+	Hash _hash;
+	key_equal _eql;
+	allocator_type _alloc;
+	size_type _head;
+	nodeptr _last = nullptr;
+	float _load_factor = 1.0;
+_Member_Data_End_
+
+	size_t _makehash(const key_type& key) const
+	{
+		return _hash(key) % _buckets.size();
+	}
+
+	nodeptr _buynode(const Key& key, nodeptr n, nodeptr p)
+	{
+		nodeptr ret = _alloca.allocate(1);
+		_alloc.construct(ret, _STD forward<Key>(key), n, p);
+		return ret;
+	}
+
+	nodeptr _insert_multiable(const Key& key)
+	{
+		if ((_size + 1) / _buckets.size() >= _load_factor)
+			_rehash(_size * 2);
+
+		++_size;
+		
+		nodeptr np = _findkey(key);
+		size_type hv = _makehash(key);
+		if (np == nullptr)
+		{
+			if (_buckets[hv])
+			{
+				_buckets[hv] = _buynode(key, _buckets[hv], _buckets[hv]->prev);
+				_buckets[hv]->next->prev = _buckets[hv];
+				_buckets[hv]->prev->next = _buckets[hv];
+				return _buckets[hv];
+			}
+			else
+			{
+				_buckets[hv] = _buynode(key, nullptr, _last);
+				if (_size == 1)
+					_head = hv;
+
+				if (_last)
+					_last->next = _buckets[hv];
+				else
+					_head = hv;
+
+				return _last = _buckets[hv];
+			}
+		}
+		else
+		{
+			nodeptr newpt = _buynode(key, np->next,np);
+			np->next = newpt;
+			if (np == _last)
+			{
+				_last = newpt;
+			}
+			else
+			{
+				newpt->next->prev = newpt;
+			}
+			return newpt;
+		}
+	}
+
+	nodeptr _findkey(const Key& key) const
+	{
+		size_type hv = _makehash(key);
+		nodeptr np = _buckets[hv];
+		for (; np&&_makehash(np->key) == hv;)
+			if (np->key == key)
+				return np;
+		return nullptr;
+	}
+
+	void _freenode(nodeptr where)
+	{
+		_alloc.destroy(where);
+		_alloc.deallocate(where, 1);
+	}
+
+public:
+	unordered_multiset() :_buckets(4), _size(0), _hash(Hash()), _eql(Pred()), _alloc(allocator_type())
+	{   }
+
+	explicit unordered_multiset(size_type n,
+		const hasher& hf = hasher(),
+		const key_equal& eq = key_equal(),
+		const allocator_type& alloc = allocator_type())
+		:_buckets(n), _size(0), _hash(hf), _eql(eq), _alloc(allocator_type())
+	{   }
+
+	explicit unordered_multiset(const allocator_type& alloc)
+		:_buckets(4), _size(0), _hash(Hash()), _eql(Pred()), _alloc(alloc)
+	{   }
+
+	unordered_multiset(size_type n, const allocator_type& alloc)
+		:_buckets(n), _size(0), _hash(Hash()), _eql(Pred()), _alloc(alloc)
+	{   }
+
+	unordered_multiset(size_type n, const hasher& hf, const allocator_type& alloc)
+		:_buckete(4), _size(0), _hash(hf), _eql(Pred()), _alloc(alloc)
+	{   }
+
+	template<typename Iter>
+	unordered_multiset(Iter first, Iter last, size_type n, const allocator_type& alloc)
+		: _buckets(n), _hash(Hash()), _eql(Pred()), _alloc(alloc)
+	{
+		for (; first != last; ++first)
+			_insert_multiable(*first);
+	}
+
+	template<typename Iter>
+	unordered_multiset(Iter first, Iter last, size_type n, const hasher& hf, const allocator_type& alloc)
+		:_buckets(n), _hash(hf), _eql(Pred()), _alloc(alloc)
+	{
+		for (; first != last; ++first)
+			_insert_multiable(*first);
+	}
+
+	unordered_multiset(const unordered_multiset& _Right)
+		:_buckets(_Right._buckets.size()), _hash(_Right._hash), _eql(_Right._eql), _alloc(_Right._alloc)
+	{
+		for (iterator it = _Right.begin(); it; ++it)
+			_insert_multiable(*it);
+	}
+
+	unordered_multiset(const unordered_multiset& _Right, const allocator_type& alloc)
+		:_buckets(_Right._buckets.size()), _hash(_Right._hash), _eql(_Right._eql), _alloc(alloc)
+	{
+		for (iterator it = _Right.begin(); it; ++it)
+			_insert_multiable(*it);
+	}
+
+	unordered_multiset(const unordered_multiset&& _Right)
+		:_buckets(_STD move(_Right._buckets)), _size(_Right._size), _hash(_STD move(_Right._hash)),
+		_eql(_STD move(_Right._eql)), _alloc(_STD move(_Right._alloc))
+	{   }
+
+	unordered_multiset(const unordered_multiset&& _Right, const allocator_type& alloc)
+		:_buckets(_STD move(_Right._buckets)), _size(_Right._size), _hash(_STD move(_Right._hash)),
+		_eql(_STD move(_Right._eql)), _alloc(_STD move(alloc))
+	{   }
+
+	unordered_multiset(_STD initializer_list<key_type> il, size_type n, const hasher&hf = hasher(),
+		const key_equal&eq = key_equal(), const allocator_type& alloc = allocator_type())
+		:_buckets(n), _hash(hf), _eql(eq), _alloc(alloc)
+	{
+		for (auto&t : il)
+			_insert_multiable(t);
+	}
+
+	unordered_multiset(_STD initializer_list<key_type> il, size_type n, const allocator_type& alloc)
+		:_buckets(n), _hash(Hash()), _eql(Pred()), _alloc(alloc)
+	{
+		for (auto&t : il)
+			_insert_multiable(t);
+	}
+
+	unordered_multiset(_STD initializer_list<key_type> il, size_type n, const hasher& hf, const allocator_type& alloc)
+		:_buckets(n), _hash(hf), _eql(Pred()), _alloc(alloc)
+	{
+		for (auto&t : il)
+			_insert_multiable(t);
+	}
+
+	~unordered_multiset()
+	{
+		clear();
+	}
+
+	unordered_multiset& operator=(const unordered_multiset& _Right)
+	{
+		clear();
+		_buckets.resize(_Right._buckets.size());
+		_hash = _Right._hash;
+		_eql = _Right._eql;
+		_alloc = _Right._alloc;
+		for (iterator it = _Right.begin(); it != _Right.end(); ++it)
+			_insert_multiable(*it);
+
+		return *this;
+	}
+
+	unordered_multiset& operator=(const unordered_multiset&& _Right)
+	{
+		clear();
+		_buckets = _STD move(_Right._buckets);
+		_hash = _STD move(_Right._hash);
+		_eql = _STD move(_Right._eql);
+		_alloc = _STD move(_Right._alloc);
+		_size = _Right._size;
+		_head = _Right._head;
+		_last = _Right._last;
+
+		return *this;
+	}
+
+	unordered_multiset& operator=(_STD initializer_list<key_type> il)
+	{
+		clear();
+		for (_STD initializer_list<key_type>::iterator it = il.begin(); il != il.end(); ++it)
+			_insert_multiable(*it);
+		return *this;
+	}
+
+	void clear() noexcept
+	{
+		for (nodeptr np = _buckets[_head]; np;)
+		{
+			nodeptr tmp = np->next;
+			_freenode(np);
+			np = tmp;
+		}
+		_buckets.clear();
+		_size = 0;
+		_last = nullptr;
+	}
+};
