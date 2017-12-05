@@ -16,6 +16,10 @@ struct uset_node
 
 	uset_node(const Key& k,uset_node* n,uset_node* p):key(k),next(n),prev(p)
 	{   }
+
+	template<typename ...Args>
+	uset_node(Args&&...args):key(args...)
+	{   }
 };
 
 template<typename Key>
@@ -560,7 +564,7 @@ public:
 
 	const_iterator begin() const noexcept
 	{
-		retunr _buckets[_head];
+		return _buckets[_head];
 	}
 
 	const_iterator cbegin() const noexcept
@@ -627,7 +631,7 @@ public:
 
 	const_local_iterator cend(size_type n) const
 	{
-		return end(n);
+		return static_cast<const_local_iterator>(end(n));
 	}
 
 	iterator find(const Key& key)
@@ -648,13 +652,13 @@ public:
 	_STD pair<iterator, iterator> equal_range(const Key& key)
 	{
 		iterator ret = _findkey(key);
-		return _STD make_pair(ret, ret);
+		return _STD make_pair(static_cast<iterator>(ret),static_cast<iterator>(ret));
 	}
 	
 	_STD pair<const_iterator, const_iterator> equal_range(const Key& key) const
 	{
 		const_iterator ret = _findkey(key);
-		return _STD make_pair(ret, ret);
+		return _STD make_pair(static_cast<const_iterator>(ret), static_cast<const_iterator>(ret));
 	}
 
 	template<typename ...Args>
@@ -999,9 +1003,50 @@ _Member_Data_End_
 		size_type hv = _makehash(key);
 		nodeptr np = _buckets[hv];
 		for (; np&&_makehash(np->key) == hv;)
-			if (np->key == key)
+			if (_eql(np->key,key))
 				return np;
 		return nullptr;
+	}
+
+	void _insert_node(nodeptr np)
+	{
+		size_type hv = _makehash(np->key);
+
+		if (_size == 0)
+			_head = hv;
+
+		if (_buckets[hv])
+		{
+			np->next = _buckets[hv];
+			np->prev = _buckets[hv]->prev;
+			_buckets[hv] = np;
+			_buckets[hv]->next->prev = _buckets[hv];
+			_buckets[hv]->prev->next = _buckets[hv];
+			return _buckets[hv];
+		}
+		else
+		{
+			_buckets[hv] = np;
+			np->prev = _last;
+
+			if (_last)
+				_last->next = _buckets[hv];
+			else
+				_head = hv;
+
+			return _last = _buckets[hv];
+		}
+		++_size;
+	}
+
+	void _insert_after(nodeptr where,nodeptr which)
+	{
+		which->next = where->next;
+		which->prev = where;
+		where->next = which;
+		if (which->next)
+			which->next->prev = which;
+		++_size;
 	}
 
 	void _freenode(nodeptr where)
@@ -1135,6 +1180,255 @@ public:
 		return *this;
 	}
 
+	bool empty() const
+	{
+		return (_size == 0);
+	}
+
+	size_type size() const
+	{
+		return _size;
+	}
+
+	size_type max_size() const
+	{
+		return 536870911;
+	}
+
+	iterator begin() noexcept
+	{
+		return _buckets[_head];
+	}
+
+	const_iterator begin() const noexcept
+	{
+		return _buckets[_head];
+	}
+
+	const_iterator cbegin() const noexcept
+	{
+		return _buckets[_head];
+	}
+
+	local_iterator begin(size_type n)
+	{
+		if (n >= _buckets.size())
+			return nullptr
+		else
+			return _buckets[n];
+	}
+
+	const_local_iterator begin(size_type n) const
+	{
+		if (n >= _buckets.size())
+			return nullptr
+		else
+			return _buckets[n];
+	}
+
+	const_local_iterator cbegin(size_type n) const
+	{
+		if (n >= _buckets.size())
+			return nullptr
+		else
+			return _buckets[n];
+	}
+
+	iterator end() noexcept
+	{
+		return nullptr;
+	}
+
+	const_iterator end() const noexcept
+	{
+		return nullptr;
+	}
+
+	const_iterator cend() const noexcept
+	{
+		return nullptr;
+	}
+
+	local_iterator end(size_type n)
+	{
+		if (n >= _buckets.size())
+			return nullptr;
+
+		if (!_buckets[n])
+			return nullptr;
+
+		nodeptr np = _buckets[n];
+		for (; np->next&&n == _makehash(np->next->key); np = np->next);
+		return np->next;
+	}
+
+	const_local_iterator end(size_type n) const
+	{
+		return static_cast<const_local_iterator>(end(n));
+	}
+
+	const_local_iterator cend(size_type n) const
+	{
+		return static_cast<const_local_iterator>(end(n));
+	}
+
+	iterator find(const Key&key)
+	{
+		return _findkey(key);
+	}
+
+	const_iterator find(const Key& key) const
+	{
+		return _findkey(key);
+	}
+
+	size_type count(const Key& key) const
+	{
+		nodeptr np = _findkey(key);
+		if (np == nullptr)
+			return 0;
+
+		size_type count = 1;
+		for (np = np->next; np; np = np->next)
+			if (_eql(np->key, key))
+				++count;
+			else
+				break;
+		return count;
+	}
+
+	_STD pair<iterator, iterator> equal_range(const Key& key)
+	{
+		nodeptr np = _findkey(key);
+		if (np == nullptr)
+			return _STD make_pair(static_cast<iterator>(nullptr), static_cast<iterator>(nullptr));
+
+		nodeptr last = np->next;
+		for (; last; last = last->next)
+			if (!_eql(last->key, key))
+				break;
+		return _STD make_pair(static_cast<iterator>(np), static_cast<iterator>(last));
+	}
+
+	_STD pair<const_iterator, const_iterator> equal_range(const Key& key) const
+	{
+		nodeptr np = _findkey(key);
+		if (np == nullptr)
+			return _STD make_pair(static_cast<const_iterator>(nullptr), static_cast<const_iterator>(nullptr));
+
+		nodeptr last = np->next;
+		for (; last; last = last->next)
+			if (!_eql(last->key, key))
+				break;
+		return _STD make_pair(static_cast<const_iterator>(np), static_cast<const_iterator>(last));
+	}
+
+	template<typename ...Args>
+	iterator emplace(Args...args)
+	{
+		nodeptr np = _alloc.allocate(1);
+		_allocate.construct(np,_STD forward<Args>(args)...);
+		nodeptr others = _findkey(np->key);
+		if (others == nullptr)
+			_insert_node(np);
+		else
+			_insert_after(others, np);
+		return np;
+	}
+
+	template<typename ...Args>
+	iterator emplace_hint(const_iterator hint, Args...args)
+	{
+		nodeptr np = _alloc.allocate(1);
+		_alloc.construct(np, _STD forward<Args>(args)...);
+
+		if (_eql(*hint, np->key))
+			_insert_after(hint->np, np);
+		else
+		{
+			if (others == nullptr)
+				_insert_node(np);
+			else
+				_insert_after(others, np);
+			return np;
+		}
+		return np;
+	}
+
+	iterator insert(const value_type& val)
+	{
+		return _insert_multiable(val);
+	}
+
+	iterator insert(value_type&& val)
+	{
+		return emplace(_STD forward<value_type>(val));
+	}
+
+	iterator insert(const_iterator hint, const value_type& val)
+	{
+		if (_eql(*hint, val))
+		{
+			nodeptr np = _buynode(key, hint->np->next, hint->np);
+			np->prev->next = np;
+			np->next->prev = np;
+			return np;
+		}
+
+		return insert(val);
+	}
+
+	iterator insert(const_iterator hint, value_type&& val)
+	{
+		return emplace_hint(hint, _STD forward<value_type>(val));
+	}
+
+	template<typename Iter>
+	void insert(Iter first, Iter last)
+	{
+		for (; first != last; ++first)
+			_insert_multiable(*first);
+	}
+
+	void insert(_STD initializer_list<value_type> il)
+	{
+		insert(il.begin(), il.end());
+	}
+
+	iterator erase(const_iterator position)
+	{
+		iterator ret(position.np->next);
+		_delnode(position.np);
+		return ret;
+	}
+
+	size_type erase(const Key& key)
+	{
+		nodeptr np = _findkey(key);
+		if (np == nullptr)
+			return 0;
+
+		size_type ret = 0;
+		for (; _eql(np->key, key);)
+		{
+			++ret;
+			_delnode(np);
+			np = np->next;
+			if (np == nullptr)
+				break;
+		}
+		return ret;
+	}
+
+	iterator erase(const_iterator first, const_iterator last)
+	{
+		nodeptr np = first.np;
+		np->prev->next = last.np;
+		for (; first != last; ++first)
+			_freenode(first.np);
+		return last.np;
+	}
+
 	void clear() noexcept
 	{
 		for (nodeptr np = _buckets[_head]; np;)
@@ -1146,5 +1440,34 @@ public:
 		_buckets.clear();
 		_size = 0;
 		_last = nullptr;
+	}
+
+	void swap(unordered_set& _Right)
+	{
+		_buckets.swap(_Right._buckets);
+
+		_size = _size^_Right._size;
+		_Right._size = _size^_Right._size;
+		_size = _size^_Right._size;
+
+		Hash thf = _hash;
+		_hash = _Right._hash;
+		_Right._hash = thf;
+
+		key_equal teq = _eql;
+		_eql = _Right._eql;
+		_Right._eql = teq;
+
+		_head = _head^_Right._head;
+		_Right._head = _head^_Right._head;
+		_head = _head^_Right._head;
+
+		allocator_type talloc = _alloc;
+		_alloc = _Right._alloc;
+		_Right._alloc = talloc;
+
+		nodeptr tnp = _last;
+		_last = _Right._last;
+		_Right._last = _last;
 	}
 };
