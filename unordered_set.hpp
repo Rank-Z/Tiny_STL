@@ -34,11 +34,11 @@ struct uset_const_iterator
 	using difference_type = int;
 	using node_type = uset_node<Key>;
 
-	_Member_Data_Start_
+_Member_Data_Start_
 		uset_node* np = nullptr;
-	_Member_Data_End_
+_Member_Data_End_
 
-		uset_const_iterator() = default;
+	uset_const_iterator() = default;
 
 	uset_const_iterator(uset_node* p) :np(p)
 	{   }
@@ -48,7 +48,7 @@ struct uset_const_iterator
 
 	operator bool() const
 	{
-		return np != nulllptr;
+		return np != nullptr;
 	}
 
 	uset_const_iterator& operator=(const uset_const_iterator& _Right)
@@ -202,11 +202,6 @@ struct uset_iterator
 		if (np == nullptr)
 			throw _STD out_of_range{ "iterator operator*() out_of_range" };
 		return np->key;
-	}
-
-	node_type& operator->()
-	{
-		return np;
 	}
 
 	const node_type& operator->() const
@@ -1357,7 +1352,7 @@ public:
 	}
 
 	template<typename ...Args>
-	iterator emplace(Args...args)
+	iterator emplace(Args&&...args)
 	{
 		nodeptr np = _alloc.allocate(1);
 		_allocate.construct(np, _STD forward<Args>(args)...);
@@ -1370,7 +1365,7 @@ public:
 	}
 
 	template<typename ...Args>
-	iterator emplace_hint(const_iterator hint, Args...args)
+	iterator emplace_hint(const_iterator hint, Args&&...args)
 	{
 		nodeptr np = _alloc.allocate(1);
 		_alloc.construct(np, _STD forward<Args>(args)...);
