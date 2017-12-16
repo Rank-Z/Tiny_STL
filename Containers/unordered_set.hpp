@@ -274,6 +274,7 @@ private:
 	nodeptr _insert_withoutcheck(const Key& key)
 	{
 		size_type hv = _makehash(key);
+		++_size;
 
 		if (_size == 0)
 			_head = hv;
@@ -296,7 +297,6 @@ private:
 
 			return _last = _buckets[hv];
 		}
-		++_size;
 	}
 
 	void _insert_node(nodeptr np)
@@ -624,7 +624,7 @@ public:
 			return nullptr;
 
 		nodeptr np = _buckets[n];
-		for (; np->next&&n == _makehash(np->next->key); np = np->next);
+		for (; np->next&&(n == _makehash(np->next->key)); np = np->next);
 		return np->next;
 	}
 
@@ -655,13 +655,17 @@ public:
 
 	_STD pair<iterator, iterator> equal_range(const Key& key)
 	{
-		iterator ret = _findkey(key);
-		return _STD make_pair(static_cast<iterator>(ret), static_cast<iterator>(ret));
+		iterator ret (_findkey (key));
+		iterator ret2(ret);
+		++ret2;
+		return _STD make_pair(static_cast<iterator>(ret), static_cast<iterator>(ret2));
 	}
 
 	_STD pair<const_iterator, const_iterator> equal_range(const Key& key) const
 	{
-		const_iterator ret = _findkey(key);
+		const_iterator ret (_findkey (key));
+		const_iterator ret2(ret);
+		++ret2;
 		return _STD make_pair(static_cast<const_iterator>(ret), static_cast<const_iterator>(ret));
 	}
 
