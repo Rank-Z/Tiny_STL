@@ -236,10 +236,10 @@ protected:
 	{
 		mapped_type mp;
 		_STD pair<key_type , mapped_type> (key , mp) tmp;
-		return _insert (tmp);
+		return _insert (_STD move(tmp));
 	}
 
-	nodeptr _insert(value_type&& val)
+	nodeptr _insert(value_type&& val)//withoutcheck
 	{
 		nodeptr np = _alloc.allocate(1) :
 			_alloc.construct(np , _STD forward<value_type>(val));
@@ -276,7 +276,10 @@ protected:
 
 	nodeptr _insert_multiable (const value_type& pv)
 	{
-		//TODO
+		if (((_size + 1) / _buckets.size ()) >= _load_factor)
+			_rehash (_size * 2);
+
+		return _insert_withoutcheck(pv);
 	}
 
 	iterator _erase(const_iterator position)
@@ -304,9 +307,8 @@ template<typename Key ,
 	typename T ,
 	typename Hash = _STD hash<Key> ,
 	typename Pred = _STD equal_to<Key> ,
-	typename Alloc = _STD allocator<umap_node<Key , T> >
->
-class unordered_map :public unordered_map_base<Key , T , Hash , Pred , Alloc>
+	typename Alloc = _STD allocator<umap_node<Key , T>>>
+	class unordered_map :public unordered_map_base<Key , T , Hash , Pred , Alloc>
 {
 public:
 
@@ -368,6 +370,16 @@ public:
 			_insert (*first);
 	}
 
+	template<typename Iter>
+	unordered_map(Iter first , Iter last , size_type n , const allocator_type& alloc)
+		:unordered_map(first , last , n , hasher() , key_equal() , alloc)
+	{   }
+
+	template<typename Iter>
+	unordered_map(Iter first , Iter last , size_type n , const hasher& hf , const allocator_type& alloc)
+		: unordered_map(first , last , n , hf , key_equal() , alloc)
+	{   }
+
 	unordered_map (const unordered_map& Right)
 		:unordered_map (Right , Right.get_allocator ())
 	{   }
@@ -390,7 +402,7 @@ public:
 
 	unordered_map (unordered_map&& Right , const allocator_type& alloc)
 		:unordered_map_base (_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
-			_alloc)
+			alloc)
 	{
 		_size = Right.size ();
 		_last = Right._last;
@@ -404,7 +416,7 @@ public:
 		const allocator_type& alloc = allocator_type ())
 		: unordered_map_base (n , hf , eql , alloc)
 	{
-		for (_STD initialize_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert (*it);
 	}
 
@@ -413,17 +425,17 @@ public:
 		const allocator_type& alloc)
 		: unordered_map_base (n , hasher() , key_equal() , alloc)
 	{
-		for (_STD initialize_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert (*it);
 	}
 
 	unordered_map (_STD initializer_list<value_type> il ,
-		size_type n = 4 ,
+		size_type n ,
 		const hasher&hf = hasher () ,
 		const allocator_type& alloc = allocator_type ())
 		: unordered_map_base (n , hf , key_equal() , alloc)
 	{
-		for (_STD initialize_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert (*it);
 	}
 
@@ -613,7 +625,7 @@ public:
 		iterator ret (_findkey (key));
 		iterator ret2(ret);
 		++ret2;
-		return _STD make_pair (static_cast<iterator>(ret) , static_cast<iterator>(ret));
+		return _STD make_pair (static_cast<iterator>(ret) , static_cast<iterator>(ret2));
 	}
 
 	_STD pair<const_iterator , const_iterator> equal_range (const key_type& key) const
@@ -621,7 +633,7 @@ public:
 		const_iterator ret (_findkey (key));
 		const_iterator ret2(ret);
 		++ret2;
-		return _STD make_pair (static_cast<const_iterator>(ret) , static_cast<const_iterator>(ret));
+		return _STD make_pair (static_cast<const_iterator>(ret) , static_cast<const_iterator>(ret2));
 	}
 
 	template<typename ...Args>
@@ -812,5 +824,505 @@ public:
 
 };
 
+template<typename Key ,
+	typename T ,
+	typename Hash = _STD hash<Key> ,
+	typename Pred = _STD equal_to<Key> ,
+	typename Alloc = _STD allocator<umap_node<Key , T>>>
+	class unordered_multimap :public unordered_map_base<Key , T , Hash , Pred , Alloc>
+{
+public:
+
+	using key_type = Key;
+	using mapped_type = T;
+	using value_type = _STD pair<const Key , T>;
+	using hasher = Hash;
+	using key_equal = Pred;
+	using allocator_type = Alloc;
+	using reference = value_type & ;
+	using const_reference = const value_type&;
+	using pointer = typename _STD allocator_traits<Alloc>::pointer;				//just value_type*
+	using const_pointer = typename _STD allocator_traits<Alloc>::const_pointer;	//just const value_type*
+	using iterator = map_iterator<Key , T>;
+	using const_iterator = map_const_iterator<Key , T>;
+	using local_iterator = iterator;
+	using const_local_iterator = const_iterator;
+	using difference_type = ptrdiff_t;
+	using size_type = unsigned;
+
+
+private:
+	using nodetype = umap_node<Key , T>;
+	using nodeptr = nodetype * ;
+
+
+	unordered_multimap()
+		:unordered_multimap(4)
+	{   }
+
+	explicit unordered_multimap(size_type n ,
+		const hasher& hf = hasher() ,
+		const key_equal& eql = key_equal() ,
+		const allocator_type& alloc = allocator_type())
+		:unordered_map_base(n , hf , eql , alloc)
+	{   }
+
+	explicit unordered_multimap(const allocator_type& alloc)
+		:unordered_map_base(4 , hasher() , key_equal() , alloc)
+	{   }
+
+	unordered_multimap(size_type n , const allocator_type& alloc)
+		:unordered_map_base(n , hasher() , key_equal() , alloc)
+	{   }
+
+	unordered_multimap(size_type n , const hasher& hf , const allocator_type& alloc)
+		:unordered_map_base(n , hf , key_equal() , alloc)
+	{   }
+
+	template<typename Iter>
+	unordered_multimap(Iter first , Iter last ,
+		size_type n = 4 ,
+		const hasher& hf = hasher() ,
+		const key_equal& eql = key_equal() ,
+		const allocator_type& alloc = allocator_type())
+		: unordered_map_base(n , hf , eql , alloc)
+	{
+		for (; first != last; ++first)
+			_insert_multiable(*first);
+	}
+
+	template<typename Iter>
+	unordered_multimap(Iter first , Iter last , size_type n , const allocator_type& alloc)
+		:unordered_multimap(first , last , n , hasher() , key_equal() , alloc)
+	{   }
+
+	template<typename Iter>
+	unordered_multimap(Iter first , Iter last , size_type n , const hasher& hf , const allocator_type& alloc)
+		: unordered_multimap(first , last , n , hf , key_equal() , alloc)
+	{   }
+
+	unordered_multimap(const unordered_multimap& Right)
+		:unordered_multimap(Right , Right.get_allocator())
+	{   }
+
+	unordered_multimap(const unordered_multimap& Right , const allocator_type& alloc)
+		: unordered_map_base (Right.bucket_count() , Right.hash_fuction() , Right.key_eql() , alloc)
+	{
+		for (const_iterator it = Right.begin(); it != Right.end(); ++it)
+			_insert_multiable(*it);
+	}
+
+	unordered_multimap(unordered_multimap&& Right)
+		:unordered_map_base(_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
+			_STD move (Right._alloc))
+	{
+		_size = Right.size ();
+		_last = Right._last;
+		_load_factor = Right.load_factor ();
+	}
+
+	unordered_multimap (unordered_multimap&& Right , const allocator_type& alloc)
+		:unordered_map_base (_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
+			alloc)
+	{
+		_size = Right.size ();
+		_last = Right._last;
+		_load_factor = Right.load_factor ();
+	}
+
+	unordered_multimap(_STD initializer_list<value_type> il , size_type n , const hasher& hf = hasher() ,
+		const key_equal& eql = key_equal() , const allocator_type& alloc = allocator_type())
+		:unordered_map_base(n , hf , eql , alloc)
+	{
+		for (_STD initializer_list<value_type>::const_iterator it = il.begin(); it != il.end(); ++it)
+			_insert_multiable(*it);
+	}
+
+	unordered_multimap(_STD initializer_list<value_type> il ,
+		size_type n ,
+		const allocator_type& alloc)
+		: unordered_map_base (n , hasher() , key_equal() , alloc)
+	{
+		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+			_insert_multiable (*it);
+	}
+
+	unordered_multimap (_STD initializer_list<value_type> il ,
+		size_type n ,
+		const hasher&hf = hasher () ,
+		const allocator_type& alloc = allocator_type ())
+		: unordered_map_base (n , hf , key_equal() , alloc)
+	{
+		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+			_insert_multiable (*it);
+	}
+
+	unordered_multimap& operator=(const unordered_multimap& Right)
+	{
+		clear ();
+		_buckets.resize (_Right._buckets.size ());
+		_hash = _Right._hash;
+		_eql = _Right._eql;
+		_alloc = _Right._alloc;
+		for (iterator it = _Right.begin (); it != _Right.end (); ++it)
+			_insert_multiable (*it);
+
+		return *this;
+	}
+
+	unordered_multimap& operator=(unordered_multimap&& Right)
+	{
+		clear ();
+		_buckets = _STD move (_Right._buckets);
+		_hash = _STD move (_Right._hash);
+		_eql = _STD move (_Right._eql);
+		_alloc = _STD move (_Right._alloc);
+		_size = _Right._size;
+		_head = _Right._head;
+		_last = _Right._last;
+
+		return *this;
+	}
+
+	unordered_multimap& operator=(_STD initializer_list<value_type> il)
+	{
+		clear ();
+		for (_STD initializer_list<key_type>::iterator it = il.begin (); il != il.end (); ++it)
+			_insert_multiable (*it);
+		return *this;
+	}
+
+	~unordered_multimap()
+	{
+		clear();
+	}
+
+	bool empty() const noexcept
+	{
+		return (_size == 0);
+	}
+
+	size_type size () const noexcept
+	{
+		return _size;
+	}
+
+	size_type maxsize () const noexcept
+	{
+		return 357913941;
+	}
+
+	iterator begin () noexcept
+	{
+		return _buckets [_head];
+	}
+
+	const_iterator begin () const noexcept
+	{
+		return _buckets [_head];
+	}
+
+	const_iterator cbegin () const noexcept
+	{
+		return _buckets [_head];
+	}
+
+	local_iterator begin (size_type n)
+	{
+		if (n >= _buckets.size ())
+			return nullptr
+		else
+			return _buckets [n];
+	}
+
+	const_local_iterator begin (size_type n) const
+	{
+		if (n >= _buckets.size ())
+			return nullptr
+		else
+			return _buckets [n];
+	}
+
+	const_local_iterator cbegin (size_type n) const
+	{
+		if (n >= _buckets.size ())
+			return nullptr
+		else
+			return _buckets [n];
+	}
+
+	iterator end () noexcept
+	{
+		return nullptr;
+	}
+
+	const_iterator end () const noexcept
+	{
+		return nullptr;
+	}
+
+	const_iterator cend () const noexcept
+	{
+		return nullptr;
+	}
+
+	local_iterator end (size_type n)
+	{
+		if (n >= _buckets.size ())
+			return nullptr;
+
+		if (!_buckets [n])
+			return nullptr;
+
+		nodeptr np = _buckets [n];
+		for (; np->next && (n == _makehash (np->next->getkey())); np = np->next);
+		return np->next;
+	}
+
+	const_local_iterator end (size_type n) const
+	{
+		return static_cast<const_local_iterator>(end (n));
+	}
+
+	const_local_iterator cend (size_type n) const
+	{
+		return static_cast<const_local_iterator>(end (n));
+	}
+
+	iterator find (const key_type& key)
+	{
+		return _findkey (key);
+	}
+
+	const_iterator find (const key_type& key) const
+	{
+		return _findkey (key);
+	}
+
+	size_type count(const key_type& key) const
+	{
+		nodeptr np = _findkey(key);
+		if (np == nullptr)
+			return 0;
+		size_type ret = 1;
+		for (np = np->next; np; np = np->next)
+			if (_eql(key , np->getkey()))
+				++count;
+			else
+				break;
+
+		return ret;
+	}
+
+	_STD pair<iterator , iterator> equal_range(const key_type& key)
+	{
+		iterator ret1 = find(key);
+		iterator ret2(ret1);
+		size_type count = count(key);
+		for (; count; --count)
+			++ret2;
+		return _STD make_pair(ret1 , ret2);
+	}
+
+	_STD pair<const_iterator , const_iterator> equal_range(const key_type& key) const
+	{
+		const_iterator ret1 = find(key);
+		const_iterator ret2(ret1);
+		size_type count = count(key);
+		for (; count; --count)
+			++ret2;
+		return _STD make_pair(ret1 , ret2);
+	}
+
+	template<typename ...Args>
+	iterator emplace(Args&&...args)
+	{
+		umap_node<key_type , mapped_type> tnode(_STD forward<Args>(args)...);
+		nodeptr newnode = &tnode;
+		nodeptr np = _findkey(tnode.getkey());
+		if (np == nullptr)
+		{
+			size_type hv = _makehash(tnode.getkey());
+			if (_buckets [hv])
+				_insert_after(_buckets [hv] , newnode);
+			else
+			{
+				_insert_after(_last , newnode);
+				_last = newnode;
+				_buckets [hv] = newnode;
+			}
+		}
+		else
+			_insert_after(np , newnode);
+
+		return newnode;
+	}
+
+	template<typename ...Args>
+	iterator emplace_hint(const_iterator position , Args&&...args)
+	{
+		umap_node<key_type , mapped_type> tnode(_STD forward<Args>(args)...);
+		nodeptr newnode = &tnode;
+		if (_eql((*position).first , tnode.getkey()))
+			_insert_after(position.np , newnode);
+		else
+		{
+			nodeptr np = _findkey(tnode.getkey());
+			if (np == nullptr)
+			{
+				size_type hv = _makehash(tnode.getkey());
+				if (_buckets [hv])
+					_insert_after(_buckets [hv] , newnode);
+				else
+				{
+					_insert_after(_last , newnode);
+					_last = newnode;
+					_buckets [hv] = newnode;
+				}
+			}
+			else
+				_insert_after(np , newnode);
+		}
+		return newnode;
+	}
+
+	iterator insert(const value_type& val)
+	{
+		return _insert_multiable(val);
+	}
+
+	_STD iterator insert(value_type&& val)
+	{
+		return _insert(val);
+	}
+
+	iterator insert(const_iterator hint , const value_type& val)
+	{
+		if (_eql((*hint).first , val.first))
+		{
+			umap_node<key_type , mapped_type> tnode(val);
+			nodeptr newnode = &tnode;
+			_insert_after(hint.np , newnode);
+			return newnode;
+		}
+		else
+			return insert(val);
+	}
+
+	iterator insert(const_iterator hint , value_type&& val)
+	{
+		return insert(val);
+	}
+
+	template<typename Iter>
+	void insert(Iter first , Iter last)
+	{
+		for (; first != last; ++first)
+			insert(*first);
+	}
+
+	void insert(_STD initializer_list<value_type> il)
+	{
+		insert(il.begin() , il.end());
+	}
+
+	iterator erase(const_iterator position)
+	{
+		return _erase(position);
+	}
+
+	iterator erase(const_iterator first , const_iterator last)
+	{
+		return _erase(first , last);
+	}
+
+	size_type erase(const key_type& key)
+	{
+		size_type ret = count(key);
+		if (ret != 0)
+		{
+			_STD pair<iterator , iterator> itp = equal_range(key);
+			erase(itp.first , itp.second);
+		}
+		return ret;
+	}
+
+	void clear () noexcept
+	{
+		_clear ();
+	}
+
+	void swap(unordered_multimap& Right)
+	{
+		_STD swap(_buckets , Right._buckets);
+		_STD swap(_size , Right._size);
+		_STD swap(_hash , Right._hash);
+		_STD swap(_eql , Right._eql);
+		_STD swap(_alloc , Right._alloc);
+		_STD swap(_head , Right._head);
+		_STD swap(_last , Right._last);
+		_STD swap(_load_factor , Right._load_factor);
+	}
+
+	size_type bucket_count() const noexcept
+	{
+		return _bucket_count();
+	}
+
+	size_type max_bucket_count() const noexcept
+	{
+		return _max_bucket_count();
+	}
+
+	size_type bucket_size(size_type n) const
+	{
+		return _bucket_size(n);
+	}
+
+	size_type bucket(const key_type& key) const
+	{
+		return _makehash(key);
+	}
+
+	float load_factor() const noexcept
+	{
+		return _get_load_factor();
+	}
+
+	float max_load_factor() const noexcept
+	{
+		return _load_factor;
+	}
+
+	void max_load_factor(float newlf)
+	{
+		_max_load_factor(newlf);
+	}
+
+	void rehash(size_type n)
+	{
+		_rehash(n);
+	}
+
+	void reserve(size_type n)
+	{
+		_reserve(n);
+	}
+
+	hasher hash_function() const
+	{
+		return _hash_function();
+	}
+
+	key_equal key_eq() const
+	{
+		return _key_eq();
+	}
+
+	allocator_type get_allocator() const
+	{
+		return _get_allocator();
+	}
+};
 
 #endif //CONTAINERS_UNORDERED_MAP_HPP
