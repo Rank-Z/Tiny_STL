@@ -84,10 +84,11 @@ public:
 		return np->data;
 	}
 
-	const node_type& operator->() const
+	const node_type* operator->() const
 	{
-		return *np;
+		return np;
 	}
+
 private:
 	nodeptr np = nullptr;
 };
@@ -161,16 +162,16 @@ public:
 		return tmp;
 	}
 
-	value_type operator*() const
+	value_type& operator*() const
 	{
 		if (np == nullptr)
 			throw _STD out_of_range { "map_iterator operator*() out_of_range" };
 		return np->data;
 	}
 
-	node_type& operator->() const
+	nodeptr operator->() const
 	{
-		return *np;
+		return np;
 	}
 
 private:
