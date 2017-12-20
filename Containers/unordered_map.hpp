@@ -199,26 +199,10 @@ protected:
 
 	using unordered_base::unordered_base;
 
-	unordered_map_base()
-		:unordered_base()
-	{   }
-
-	unordered_map_base(size_type n , const hasher&hf , const key_equal& eql , const allocator_type& alloc)
-		:unordered_base(n , hf , eql , alloc)
-	{   }
-
-	unordered_map_base (_STD vector<nodeptr>&& vn , hasher&& hf , key_equal&& eql , allocator_type&& alloc)
-		:unordered_base (vn , hf , eql , alloc)
-	{   }
-
-	unordered_map_base (_STD vector<nodeptr>&& vn , hasher&& hf , key_equal&& eql , const allocator_type& alloc)
-		:unordered_base (vn , hf , eql , alloc)
-	{   }
-
-	nodeptr _buynode (const key_type& key , const mapped_type& val , nodeptr n , nodeptr p)
+	nodeptr _buynode (const key_type& key , const mapped_type& val , nodeptr n=nullptr, nodeptr p=nullptr)
 	{
 		nodeptr ret = _alloc.allocate (1);
-		_alloc.construct (ret , _STD forward<const key_type> (key) , _STD forward<const map_type> (val) , n , p);
+		_alloc.construct (ret , key ,val , n , p);
 		return ret;
 	}
 
@@ -432,8 +416,8 @@ public:
 
 	unordered_map (_STD initializer_list<value_type> il ,
 		size_type n ,
-		const hasher&hf = hasher () ,
-		const allocator_type& alloc = allocator_type ())
+		const hasher&hf ,
+		const allocator_type& alloc)
 		: unordered_map_base (n , hf , key_equal() , alloc)
 	{
 		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
