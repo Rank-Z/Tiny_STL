@@ -8,7 +8,7 @@
 #include<initializer_list>
 #include<exception>
 
-/*                                        map_iterator                          */
+/*                                        map_const_iterator                          */
 template<typename Key , typename T>
 class map_const_iterator
 {
@@ -93,6 +93,7 @@ private:
 	nodeptr np = nullptr;
 };
 
+/*                            map_iterator                                      */
 
 template<typename Key , typename T>
 class map_iterator
@@ -178,6 +179,8 @@ private:
 	nodeptr np = nullptr;
 };
 
+/*                                      unordered_map_base                             */
+
 template<typename Key ,
 	typename T ,
 	typename Hash ,
@@ -199,10 +202,10 @@ protected:
 
 	using unordered_base::unordered_base;
 
-	nodeptr _buynode (const key_type& key , const mapped_type& val , nodeptr n=nullptr, nodeptr p=nullptr)
+	nodeptr _buynode (const key_type& key , const mapped_type& val , nodeptr n = nullptr , nodeptr p = nullptr)
 	{
 		nodeptr ret = _alloc.allocate (1);
-		_alloc.construct (ret , key ,val , n , p);
+		_alloc.construct (ret , key , val , n , p);
 		return ret;
 	}
 
@@ -283,7 +286,6 @@ protected:
 		return last.np;
 	}
 };
-
 
 
 /*                                           unordered_map                                        */
@@ -809,6 +811,8 @@ public:
 
 };
 
+/*                                            unordered_multimap                   */
+
 template<typename Key ,
 	typename T ,
 	typename Hash = _STD hash<Key> ,
@@ -884,7 +888,10 @@ private:
 	template<typename Iter>
 	unordered_multimap(Iter first , Iter last , size_type n , const hasher& hf , const allocator_type& alloc)
 		: unordered_multimap(first , last , n , hf , key_equal() , alloc)
-	{   }
+	{
+		for (; first != last; ++first)
+			_insert_multiable(*first);
+	}
 
 	unordered_multimap(const unordered_multimap& Right)
 		:unordered_multimap(Right , Right.get_allocator())
@@ -934,8 +941,8 @@ private:
 
 	unordered_multimap (_STD initializer_list<value_type> il ,
 		size_type n ,
-		const hasher&hf = hasher () ,
-		const allocator_type& alloc = allocator_type ())
+		const hasher&hf,
+		const allocator_type& alloc)
 		: unordered_map_base (n , hf , key_equal() , alloc)
 	{
 		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
@@ -1092,7 +1099,7 @@ private:
 		size_type ret = 1;
 		for (np = np->next; np; np = np->next)
 			if (_eql(key , np->getkey()))
-				++count;
+				++ret;
 			else
 				break;
 
@@ -1103,8 +1110,8 @@ private:
 	{
 		iterator ret1 = find(key);
 		iterator ret2(ret1);
-		size_type count = count(key);
-		for (; count; --count)
+		size_type num = count(key);
+		for (; num; --num)
 			++ret2;
 		return _STD make_pair(ret1 , ret2);
 	}
@@ -1113,8 +1120,8 @@ private:
 	{
 		const_iterator ret1 = find(key);
 		const_iterator ret2(ret1);
-		size_type count = count(key);
-		for (; count; --count)
+		size_type num = count(key);
+		for (; num; --num)
 			++ret2;
 		return _STD make_pair(ret1 , ret2);
 	}

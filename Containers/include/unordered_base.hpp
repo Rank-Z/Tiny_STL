@@ -7,8 +7,32 @@
 #include<initializer_list>
 #include<exception>
 #define _STD ::std::
-#define _Member_Data_Start_
-#define _Member_Data_End_
+
+template<typename Key>
+class uset_node
+{
+public:
+	using key_type = Key;
+	using value_type = key_type;
+
+	uset_node() = delete;
+
+	uset_node(const key_type& k , uset_node* n = nullptr , uset_node* p = nullptr)
+		:key(k),next(n),prev(p)
+	{   }
+
+	uset_node(key_type&& k) :key(k),next(nullptr),prev(nullptr)
+	{   }
+
+	const key_type& getkey()
+	{
+		return key;
+	}
+
+	const key_type key;
+	uset_node* next;
+	uset_node* prev;
+};
 
 template<typename Key, typename T>
 class umap_node
@@ -18,7 +42,7 @@ public:
 	using mapped_type = T;
 	using value_type = _STD pair<const Key, T>;
 
-	umap_node () = default;
+	umap_node () = delete;
 
 	umap_node(const Key& key, const T& value, umap_node* n = nullptr, umap_node* p = nullptr) :data(key, value), next(n), prev(p)
 	{   }
@@ -42,9 +66,11 @@ public:
 	}
 
 	_STD pair<const Key, T> data;
-	umap_node* next = nullptr;
-	umap_node* prev = nullptr;
+	umap_node* next;
+	umap_node* prev;
 };
+
+
 
 template<typename nodetype,
 	typename Hash,
@@ -274,6 +300,9 @@ protected:
 	nodeptr _last = nullptr;
 	float _load_factor = 1.0;
 };
+
+
+
 
 
 
