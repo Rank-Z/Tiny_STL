@@ -6,32 +6,35 @@
 #include<utility>
 #define _STD ::std::
 
-template<typename Key>
-class RB_node
-{
-public:
-	using key_type = Key;
-	using value_type = key_type;
 
-	RB_node(const Key&key , RB_node* p = nullptr , RB_node* l = nullptr , RB_node* r = nullptr)
-		:k(key) , par(p) , left(l) , right(r)
-	{   }
+//node like this
 
-	RB_node()
-		:k(Key()) , par(nullptr) , left(nullptr) , right(nullptr) , isred(false)
-	{   }
-
-	Key& getkey()
-	{
-		return k;
-	}
-
-	Key k;
-	bool isred;
-	RB_node* par;
-	RB_node* left;
-	RB_node* right;
-};//TODO:delete
+//template<typename Key>
+//class RB_node
+//{
+//public:
+//	using key_type = Key;
+//	using value_type = key_type;
+//
+//	RB_node(const Key&key , RB_node* p = nullptr , RB_node* l = nullptr , RB_node* r = nullptr)
+//		:k(key) , par(p) , left(l) , right(r)
+//	{   }
+//
+//	RB_node()
+//		:k(Key()) , par(nullptr) , left(nullptr) , right(nullptr) , isred(false)
+//	{   }
+//
+//	Key& getkey()
+//	{
+//		return k;
+//	}
+//
+//	Key k;
+//	bool isred;
+//	RB_node* par;
+//	RB_node* left;
+//	RB_node* right;
+//};
 
 
 
@@ -91,7 +94,7 @@ public:
 	}
 
 	RB_Tree(RB_Tree&& right , const Allocator& alloc)
-		:RB_Tree(right)
+		:RB_Tree(_STD move(right))
 	{
 		_alloc = alloc;
 	}
@@ -119,7 +122,7 @@ public:
 
 	void swap(RB_Tree& right)
 	{
-
+		_STD swap(*this , right);
 	}
 
 	~RB_Tree()
@@ -171,10 +174,18 @@ public:
 		return back_count;
 	}
 
-	void insert_multiable(const key_type& key)
+	iterator insert_multiable(const key_type& key)
 	{
 		nodeptr np = buynode(key);
 		insert(np);
+		return make_iter(np);
+	}
+
+	iterator insert_multiable(key_type&& key)
+	{
+		nodeptr np = buynode_rvalue(_STD move(key));
+		insert(np);
+		return make_iter(np);
 	}
 
 	_STD pair<iterator,bool> insert_unique(const key_type& key)
@@ -197,7 +208,7 @@ public:
 		bool ret = false;
 		if (np == nullptr)
 		{
-			np = buynode_rvalue(key);
+			np = buynode_rvalue(_STD move(key));
 			insert(np);
 			ret = true;
 		}
