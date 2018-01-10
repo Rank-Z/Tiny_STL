@@ -54,6 +54,7 @@ public:
 	using iterator = Itertype;
 	using key_compare = Compare;
 	using ketptr = key_type * ;
+	using size_type = unsigned;
 
 	RB_Tree()
 	{
@@ -262,7 +263,7 @@ public:
 		if (now != nil)
 			return now;
 		else
-			return nullptr;
+			return nil;
 	}
 
 	int find_or_parent(const key_type& key,nodeptr& now) const
@@ -336,6 +337,12 @@ public:
 		++ret;
 		erase(pos.node);
 		return ret;
+	}
+
+	void erase(iterator first , iterator last)
+	{
+		for (; first != last; ++first)
+			erase(first.node);
 	}
 
 	void erase(nodeptr z)
@@ -443,6 +450,25 @@ public:
 	{
 		iterator it(np , this);
 		return it;
+	}
+
+	size_type count(const key_type& key)
+	{
+		nodeptr np = find(key);
+		if (np == nil)
+			return 0;
+		
+		np = successor(np);
+		for (int c = 1; np != nil;)
+		{
+			if ((!_compare(np->getkey() , key)) && (!_compare(key , np->getkey())))
+			{
+				++c;
+				np = successor(np);
+			}
+			else
+				return c;
+		}
 	}
 
 private:
