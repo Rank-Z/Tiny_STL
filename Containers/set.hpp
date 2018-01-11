@@ -17,21 +17,21 @@ public:
 	using key_type = Key;
 	using value_type = key_type;
 
-	set_node(key_type* k = nullptr , set_node* p = nullptr , set_node* l = nullptr , set_node* r = nullptr)
+	set_node(value_type* k = nullptr , set_node* p = nullptr , set_node* l = nullptr , set_node* r = nullptr)
 		:kp(k) , par(p) , left(l) , right(r) , isred(false)
 	{   }
 
 	key_type& getkey()
 	{
-		return *kp;
+		return *vp;
 	}
 
 	value_type& getvalue()
 	{
-		return *kp;
+		return *vp;
 	}
 
-	key_type* kp;
+	value_type* vp;
 	bool isred;
 	set_node* par;
 	set_node* left;
@@ -51,10 +51,12 @@ private:
 
 	using nodetype = set_node<key_type>;
 	using nodeptr = nodetype * ;
-	using treetype = RB_Tree<key_type , set_iterator , Compare , Allocator>;
+	using treetype = RB_Tree<nodetype , set_iterator , Compare , Allocator>;
 	using treeptr = treetype * ;
 	friend class treetype;
 public:
+	set_iterator() = default;
+
 	set_iterator(nodeptr n , treeptr t)
 		:node(n) , tree(t)
 	{   }
@@ -71,7 +73,7 @@ public:
 
 	const value_type& operator*() const
 	{
-		if (tree->nil == node)
+		if (tree->getnil() == node)
 			throw _STD out_of_range { "set_iterator out_of_range!" };
 		return node->getvalue();
 	}
@@ -80,7 +82,7 @@ public:
 	{
 		if (node == tree->getnil())
 			throw _STD out_of_range { "set_iterator out_of_range!" };
-		node = tree->predecessor(node);
+		node = tree->successor(node);
 		return *this;
 	}
 
@@ -100,7 +102,7 @@ public:
 			node = tree->last();
 		}
 		else
-			node = tree->successor(node);
+			node = tree->predecessor(node);
 
 		return *this;
 	}
@@ -127,6 +129,7 @@ public:
 		return node;
 	}
 
+private:
 	nodeptr node;
 	treeptr tree;
 
@@ -153,7 +156,7 @@ public:
 	using const_iterator = iterator;
 	using reverse_iterator = _STD reverse_iterator<iterator>;
 	using const_reverse_iterator = _STD reverse_iterator<const_iterator>;
-	using node_type = set<key_type>;//since C++17
+	using node_type = set_node<key_type>;//since C++ 17
 
 private:
 	using treetype = RB_Tree<set_node<key_type> , iterator , Compare , Allocator>;

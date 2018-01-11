@@ -6,39 +6,6 @@
 #include<utility>
 #define _STD ::std::
 
-
-//node like this
-
-//template<typename Key>
-//class RB_node
-//{
-//public:
-//	using key_type = Key;
-//	using value_type = key_type;
-//
-//	RB_node(const Key&key , RB_node* p = nullptr , RB_node* l = nullptr , RB_node* r = nullptr)
-//		:k(key) , par(p) , left(l) , right(r)
-//	{   }
-//
-//	RB_node()
-//		:k(Key()) , par(nullptr) , left(nullptr) , right(nullptr) , isred(false)
-//	{   }
-//
-//	Key& getkey()
-//	{
-//		return k;
-//	}
-//
-//	Key k;
-//	bool isred;
-//	RB_node* par;
-//	RB_node* left;
-//	RB_node* right;
-//};
-
-
-
-
 template<typename nodetype ,
 	typename Itertype ,
 	typename Compare ,
@@ -175,16 +142,16 @@ public:
 		return back_count;
 	}
 
-	iterator insert_multiable(const key_type& key)
+	iterator insert_multiable(const value_type& val)
 	{
-		nodeptr np = buynode(key);
+		nodeptr np = buynode(val);
 		insert(np);
 		return make_iter(np);
 	}
 
-	iterator insert_multiable(key_type&& key)
+	iterator insert_multiable(value_type&& val)
 	{
-		nodeptr np = buynode_rvalue(_STD move(key));
+		nodeptr np = buynode_rvalue(_STD move(val));
 		insert(np);
 		return make_iter(np);
 	}
@@ -223,7 +190,7 @@ public:
 		for (nodeptr temp = root; temp != nil;)
 		{
 			parent = temp;
-			if (np->getkey() < temp->getkey())
+			if (_comp(np->getkey(),temp->getkey()))
 				temp = temp->left;
 			else
 				temp = temp->right;
@@ -231,7 +198,7 @@ public:
 		np->par = parent;
 		if (parent == nil)
 			root = np;
-		else if (np->getkey() < parent->getkey())
+		else if (_comp(np->getkey() , temp->getkey()))
 			parent->left = np;
 		else
 			parent->right = np;
@@ -266,33 +233,6 @@ public:
 			return nil;
 	}
 
-	int find_or_parent(const key_type& key,nodeptr& now) const
-	{
-		if (root == nil)
-			return nullptr;
-
-		now = root;
-		for (;;)
-		{
-			if ((!_compare(key , now->getkey())) && (!_compare(now->getkey() , key)))
-				return 0;
-			else if (_compare(key , now->getkey()))
-			{
-				if (now->left == nil)
-					return 1;
-				else
-					now = now->left;
-			}
-			else
-			{
-				if (now->right == nil)
-					return -1;
-				else
-					now = now->right;
-			}
-		}
-	}
-
 	iterator lower_bound(const key_type& key) const
 	{
 		nodeptr np;
@@ -319,7 +259,7 @@ public:
 		}
 	}
 
-	bool deletekey(const key_type& key)
+	bool deletekey(const key_type& key)//unique
 	{
 		nodeptr np = find(key);
 		if (np)
@@ -477,21 +417,21 @@ private:
 	nodeptr buynode(Args&&...args)
 	{
 		nodeptr np = new nodetype;
-		np->kp = _alloc.allocate(1);
-		_alloc.construct(np->kp ,_STD forward<Args>(args)...);
+		np->vp = _alloc.allocate(1);
+		_alloc.construct(np->vp ,_STD forward<Args>(args)...);
 		return np;
 	}
 
-	nodeptr buynode_rvalue(key_type&& key)
+	nodeptr buynode_rvalue(value_type&& key)
 	{
 		nodeptr np = new nodeptr;
-		np->kp = &key;
+		np->vp = &key;
 		return np;
 	}
 
 	void freenode(nodeptr np)
 	{
-		_alloc.deallocate(np->kp,1);
+		_alloc.deallocate(np->vp,1);
 		delete np;
 	}
 
@@ -703,6 +643,33 @@ private:
 		cleartree(np->left);
 		cleartree(np->right);
 		freenode(np);
+	}
+
+	int find_or_parent(const key_type& key , nodeptr& now) const
+	{
+		if (root == nil)
+			return nullptr;
+
+		now = root;
+		for (;;)
+		{
+			if ((!_compare(key , now->getkey())) && (!_compare(now->getkey() , key)))
+				return 0;
+			else if (_compare(key , now->getkey()))
+			{
+				if (now->left == nil)
+					return 1;
+				else
+					now = now->left;
+			}
+			else
+			{
+				if (now->right == nil)
+					return -1;
+				else
+					now = now->right;
+			}
+		}
 	}
 
 	void init()
