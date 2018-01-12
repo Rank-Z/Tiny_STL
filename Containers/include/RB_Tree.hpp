@@ -156,11 +156,11 @@ public:
 		return make_iter(np);
 	}
 
-	_STD pair<iterator,bool> insert_unique(const key_type& key)
+	_STD pair<iterator,bool> set_insert_unique(const key_type& key)
 	{
 		nodeptr np = find(key);
 		bool ret = false;
-		if (np == nullptr)
+		if (np == nil)
 		{
 			np = buynode(key);
 			insert(np);
@@ -170,13 +170,41 @@ public:
 		return _STD make_pair(make_iter(np) , ret);
 	}
 
-	_STD pair<iterator , bool> insert_unique(key_type&& key)
+	_STD pair<iterator , bool> set_insert_unique(key_type&& key)
 	{
 		nodeptr np = find(key);
 		bool ret = false;
-		if (np == nullptr)
+		if (np == nil)
 		{
 			np = buynode_rvalue(_STD move(key));
+			insert(np);
+			ret = true;
+		}
+
+		return _STD make_pair(make_iter(np) , ret);
+	}
+
+	_STD pair<iterator , bool> map_insert_unique(const value_type& val)
+	{
+		nodeptr np = find(val.first);
+		bool ret = false;
+		if (np == nil)
+		{
+			np = buynode(val);
+			insert(np);
+			ret = true;
+		}
+
+		return _STD make_pair(make_iter(np) , ret);
+	}
+
+	_STD pair<iterator , bool> map_insert_unique(value_type&& val)
+	{
+		nodeptr np = find(val.first);
+		bool ret = false;
+		if (np == nil)
+		{
+			np = buynode_rvalue(_STD move(val));
 			insert(np);
 			ret = true;
 		}
@@ -208,11 +236,6 @@ public:
 		insert_fixup(np);
 
 		++_size;
-	}
-
-	void quick_insert(nodeptr hint , nodeptr np)
-	{
-
 	}
 
 	nodeptr find(const key_type& key) const
@@ -259,6 +282,23 @@ public:
 		}
 	}
 
+	iterator upper_bound_multiable(const key_type& key) const
+	{
+		nodeptr np;
+		switch (find_or_parent(key,np))
+		{
+		case 1:
+			returm make_iter(np);
+		case -1:
+			return ++make_iter(np);
+		case 0:
+			iterator it(make_iter(np));
+			for (int i = count(key); i != 0; --i)
+				++it;
+			return it;
+		}
+	}
+
 	bool deletekey(const key_type& key)//unique
 	{
 		nodeptr np = find(key);
@@ -279,10 +319,11 @@ public:
 		return ret;
 	}
 
-	void erase(iterator first , iterator last)
+	iterator erase(iterator first , iterator last)
 	{
 		for (; first != last; ++first)
 			erase(first.node);
+		return last;
 	}
 
 	void erase(nodeptr z)
