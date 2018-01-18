@@ -1,6 +1,7 @@
 #ifndef STL_ALGORITHM_HPP
 #define STL_ALGORITHM_HPP
 
+#include"algorithm_base.hpp"
 #include<utility>
 #include<iterator>
 #include<functional>
@@ -774,6 +775,70 @@ ForwardIt is_sorted_until(ForwardIt first , ForwardIt last , Compare p = Compare
 
 	return first;
 }
+
+template<typename RandomAccessIt , typename Compare = _STD less<>>
+void sort(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+{
+	constexpr int _Insertion_Sort_Max = 32;
+	typename _STD iterator_traits<RandomAccessIt>::difference_type dist = last - first;
+	if (dist < _Insertion_Sort_Max)
+		_insertion_sort(first , last , p);
+	else
+		_maxheap_sort(first , last , dist , p);
+}
+
+template<typename RandomAccessIt , typename Compare = _STD less<>>
+void partail_sort(RandomAccessIt first , RandomAccessIt mid , RandomAccessIt last , Compare p = Compare())
+{
+	using Dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
+	Dist_type dist = last - first;
+	for (Dist_type i = dist / 2; i != dist; ++i)
+		_reverse_make_heaplfy(last - 1 , dist , i , p);
+
+	Dist_type count = mid - first;
+
+	for (; first != mid; ++first)
+	{
+		_STD swap(*first , last [-1]);
+		_reverse_make_heaplfy(last - 1 , --dist , 0 , p);
+	}
+}
+
+template<typename InputIt , typename RandomAccessIt , typename Compare = _STD less<>>
+RandomAccessIt partial_sort_copy
+(InputIt first , InputIt last , RandomAccessIt dest_first , RandomAccessIt dest_last , Compare p = Compare())
+{
+	RandomAccessIt end = dest_first;
+	for (; (first != last) && (end != dest_last); ++first , ++end)
+		*end = *first;
+
+	using Dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
+	Dist_type dist = end - dest_first;
+	for (Dist_type i = dist / 2; i >= 0; --i)
+		_make_heaplfy(dest_first , dist , i , p);
+
+	for (; first != last; ++first)
+	{
+		if (p(*first , *dest_first))
+		{
+			*dest_first = *first;
+			_make_heaplfy(dest_first , dist , 0 , p);
+		}
+	}
+
+	sort(dest_first , end , p);
+
+	return end;
+}
+
+template<typename RandomAccessIt , typename Compare = _STD less<>>
+void stable_sort(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+{
+	_insertion_sort(first , last , p);
+}
+
+
+
 
 
 #endif // !STL_ALGORITHM_HPP
