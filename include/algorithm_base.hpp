@@ -1,9 +1,13 @@
+#ifndef ALGORITHM_BASE_HPP
+#define ALGORITHM_BASE_HPP
+
 #include<functional>
 #include<iterator>
+#include<stack>
 #define _STD ::std::
 
 
-template<typename RandomAccessIt,typename Compare>
+template<typename RandomAccessIt , typename Compare>
 void _insertion_sort(RandomAccessIt first , RandomAccessIt last , Compare p)
 {
 	if (last - first < 2)
@@ -22,6 +26,11 @@ void _insertion_sort(RandomAccessIt first , RandomAccessIt last , Compare p)
 
 }
 
+template<typename Dist_type>
+inline Dist_type _heap_parent(Dist_type i)
+{
+	return (i+1)/2 - 1 ;
+}
 
 template<typename Dist_type>
 inline Dist_type _heap_left(Dist_type i)
@@ -35,8 +44,8 @@ inline Dist_type _heap_right(Dist_type i)
 	return 2 * (i + 1);
 }
 
-template<typename RandomAccessIt,typename Dist_type,typename Compare>
-void _make_heaplfy(RandomAccessIt first , Dist_type size ,Dist_type index, Compare p)
+template<typename RandomAccessIt , typename Dist_type , typename Compare>
+void _make_heaplfy(RandomAccessIt first , Dist_type size , Dist_type index , Compare p)
 {
 	for (;;)
 	{
@@ -58,8 +67,8 @@ void _make_heaplfy(RandomAccessIt first , Dist_type size ,Dist_type index, Compa
 	}
 }
 
-template<typename RandomAccessIt ,typename Dist_type,typename Compare>
-void _maxheap_sort(RandomAccessIt first , RandomAccessIt last ,Dist_type dist, Compare p)
+template<typename RandomAccessIt , typename Dist_type , typename Compare>
+void _maxheap_sort(RandomAccessIt first , RandomAccessIt last , Dist_type dist , Compare p)
 {
 	Dist_type dist = last - first;
 	for (Dist_type i = dist / 2; i >= 0; --i)
@@ -75,7 +84,7 @@ void _maxheap_sort(RandomAccessIt first , RandomAccessIt last ,Dist_type dist, C
 template<typename RandomAccessIt , typename Dist_type , typename Compare>
 void _reverse_make_heaplfy(RandomAccessIt rbegin , Dist_type size , Dist_type index , Compare p)
 {
-	for(;;)
+	for (;;)
 	{
 		Dist_type left = 2 * (index + 1) - 1;
 		Dist_type right = 2 * (index + 1);
@@ -94,3 +103,42 @@ void _reverse_make_heaplfy(RandomAccessIt rbegin , Dist_type size , Dist_type in
 			break;
 	}
 }
+
+
+template<typename RandomAccessIt , typename Compare>
+typename _STD iterator_traits<RandomAccessIt>::difference_type
+_heap_test(RandomAccessIt first , RandomAccessIt last , Compare p)
+{
+	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
+	dist_type dist = last - first;
+	_STD stack<dist_type> sta;
+	sta.push(0);
+	for (; !sta.empty();)
+	{
+		dist_type now = sta.top();
+		sta.pop();
+		dist_type left = _heap_left(now);
+		dist_type right = _heap_right(now);
+		if (left < dist)
+		{
+			if (p(first [now] , first [left]))
+				return left;
+			else
+				sta.push(left);
+		}
+		if (right < dist)
+		{
+			if (p(first [now] , first [right]))
+				return right;
+			else
+				sta.push(right);
+		}
+	}
+	return dist;
+}
+
+
+
+
+
+#endif // !ALGORITHM_BASE_HPP

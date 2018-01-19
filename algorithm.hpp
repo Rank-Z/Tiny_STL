@@ -790,12 +790,12 @@ void sort(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 template<typename RandomAccessIt , typename Compare = _STD less<>>
 void partail_sort(RandomAccessIt first , RandomAccessIt mid , RandomAccessIt last , Compare p = Compare())
 {
-	using Dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
-	Dist_type dist = last - first;
-	for (Dist_type i = dist / 2; i != dist; ++i)
+	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
+	dist_type dist = last - first;
+	for (dist_type i = dist / 2; i != dist; ++i)
 		_reverse_make_heaplfy(last - 1 , dist , i , p);
 
-	Dist_type count = mid - first;
+	dist_type count = mid - first;
 
 	for (; first != mid; ++first)
 	{
@@ -812,9 +812,9 @@ RandomAccessIt partial_sort_copy
 	for (; (first != last) && (end != dest_last); ++first , ++end)
 		*end = *first;
 
-	using Dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
-	Dist_type dist = end - dest_first;
-	for (Dist_type i = dist / 2; i >= 0; --i)
+	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
+	dist_type dist = end - dest_first;
+	for (dist_type i = dist / 2; i >= 0; --i)
 		_make_heaplfy(dest_first , dist , i , p);
 
 	for (; first != last; ++first)
@@ -835,6 +835,412 @@ template<typename RandomAccessIt , typename Compare = _STD less<>>
 void stable_sort(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 {
 	_insertion_sort(first , last , p);
+}
+
+template<typename RandomAccessIt , typename Compare = _STD less<>>
+void nth_element(RandomAccessIt first , RandomAccessIt nth , RandomAccessIt last , Compare p = Compare())
+{
+	if (nth == last || nth == first)
+		return;
+
+	RandomAccessIt pivot = last - 1;
+	RandomAccessIt left = first;
+	RandomAccessIt right = pivot - 1;
+	for (;;)
+	{
+		for (;;)
+		{
+			for (; left < pivot; ++left)
+				if (p(*pivot , *left))
+					break;
+
+			for (; right > first; --right)
+				if (p(*right , *pivot))
+					break;
+
+			if (left >= right)
+				break;
+			else
+				_STD iter_swap(left , right);
+		}
+		_STD swap(left , pivot);
+		if (left == nth)
+			break;
+		else if (left < nth)
+		{
+			first = left = left + 1;
+			right = pivot - 1;
+		}
+		else
+		{
+			pivot = left - 1;
+			right = pivot - 1;
+			left = first;
+		}
+	}
+}
+
+template<typename ForwardIt , typename T , typename Compare = _STD less<>>
+ForwardIt lower_bound(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
+{
+	using dist_type = typename _STD iterator_traits<ForwardIt>::difference_type;
+	dist_type length = _STD distance(first , last);
+	ForwardIt it;
+	for (; length>0;)
+	{
+		it = first;
+		_STD advance(it , length / 2);
+		if (p(*it , value))
+		{
+			first = ++it;
+			length /= 2;
+			--length;
+		}
+		else
+			length /= 2;
+	}
+	return first;
+}
+
+template<typename ForwardIt , typename T , typename Compare = _STD less<>>
+ForwardIt upper_bound(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
+{
+	using dist_type = typename _STD iterator_traits<ForwardIt>::difference_type;
+	dist_type length = _STD distance(first , last);
+	ForwardIt it;
+	for (; length > 0;)
+	{
+		it = first;
+		_STD advance(it , length / 2);
+		if (!p(value , *it))
+		{
+			first = ++it;
+			length /= 2;
+			--length;
+		}
+		else
+			length /= 2;
+	}
+	return first;
+}
+
+template<typename ForwardIt , typename T , typename Compare = _STD less<>>
+bool binary_search(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
+{
+	first = lower_bound(first , last , value , p);
+	if (first == last)
+		return false;
+	if (p(value , *first))
+		return false;
+	else
+		return true;
+}
+
+template<typename ForwardIt , typename T , typename Compare = _STD less<>>
+_STD pair<ForwardIt , ForwardIt> equal_range(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
+{
+	return _STD make_pair(lower_bound(first , last , value , p) , upper_bound(first , last , value , p));
+}
+
+template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename Compare = _STD less<>>
+OutputIt merge(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_frst , Compare p = Compare())
+{
+	for (; (first1 != last1) && (first2 != last2);)
+	{
+		if (p(*first2 , *first1))
+			*(dest_frst++) = *(first2++);
+		else
+			*(dest_frst++) = *(first1++);
+	}
+	for (; first1 != last1;)
+		*(dest_frst++) = *(first1++);
+	for (; first2 != last2;)
+		*(dest_frst++) = *(first2++);
+
+	return dest_frst;
+}
+
+template<typename BidirectionalIt , typename Compare = _STD less<>>
+void inplace_merge(BidirectionalIt first , BidirectionalIt mid , BidirectionalIt last , Compare p = Compare())
+{
+	for (; mid != last; ++mid)
+	{
+		BidirectionalIt it = mid;
+		BidirectionalIt prev = it;
+		--prev;
+		for (; it != first; --it , --prev)
+			if (p(*it , *prev))
+				iter_swap(it , prev);
+			else
+				break;
+	}
+}
+
+template<typename InputIt1 , typename InputIt2 , typename Compare = _STD less<>>
+bool includes(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , Compare p = Compare())
+{
+	for (; first1 != last1; ++first1)
+	{
+		if (first2 == last2)
+			return true;
+		if (p(*first1 , *first2))
+			continue;
+		else if (!p(*first2 , *first1))
+			++first2;
+		else
+			return false;
+	}
+	if (first2 != last2)
+		return false;
+	else
+		return true;
+}
+
+template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename Compare = _STD less<>>
+OutputIt set_difference
+(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_first , Compare p = Compare())
+{
+	for (; first1 != last1;)
+	{
+		if (first2 == last2)
+			return copy(first1 , last1 , dest_first);
+
+		if (p(*first1 , *first2))
+			*(dest_first++) = *(first1++);
+		else
+		{
+			if (!p(*first2 , *first1))
+				++first1;
+			++first2;
+		}
+	}
+	return dest_first;
+}
+
+template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename Compare = _STD less<>>
+OutputIt set_intersection
+(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_first , Compare p = Compare())
+{
+	for (; first1 != last1;)
+	{
+		if (p(*first1 , *first2))
+			++first1;
+		else
+		{
+			if (!p(*first2 , *first1))
+				*(dest_first++) = *(first1++);
+			++first2;
+		}
+	}
+	return dest_first;
+}
+
+template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename Compare = _STD less<>>
+OutputIt set_symmetric_difference
+(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_first , Compare p = Compare())
+{
+	for (; first1 != last1;)
+	{
+		if (first2 == last2)
+			return copy(first1 , last1 , dest_first);
+
+		if (p(*first1 , *first2))
+			*(dest_first++) = *(first1++);
+		else
+		{
+			if (p(*first2 , *first1))
+				*(dest_first++) = *(first2++);
+			else
+			{
+				++first1;
+				++first2;
+			}
+		}
+	}
+
+	return copy(first2 , last2 , dest_first);
+}
+
+template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename Compare = _STD less<>>
+OutputIt set_union
+(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_first , Compare p = Compare())
+{
+	for (; first1 != last1;)
+	{
+		if (first2 == last2)
+			return copy(first1 , last1 , dest_first);
+
+		if (p(*first1 , *first2))
+			*(dest_first++) = *(first1++);
+		else
+		{
+			if (p(*first2 , *first1))
+				*(dest_first++) = *(first2++);
+			else
+			{
+				*(dest_first++) = *(first1);
+				++first1;
+				++first2;
+			}
+		}
+	}
+
+	return copy(first2 , last2 , dest_first);
+}
+
+template<typename RandomAccessIt , typename Compare = _STD less<>>
+bool is_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+{
+	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
+	dist_type dist = last - first;
+	if (_heap_test(first , last , p) != dist)
+		return false;
+	else
+		return true;
+}
+
+template<typename RandomAccessIt , typename Compare = _STD less<>>
+RandomAccessIt is_heap_until(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+{
+	_STD advance(first , _heap_test(first , last , p) - 1);
+	return first;
+}
+
+template<typename RandomAccessIt , typename Compare = _STD less<>>
+void make_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+{
+	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
+	dist_type dist = last - first;
+	for (dist_type i = dist / 2; i >= 0; --i)
+		_make_heaplfy(first , dist , i , p);
+}
+
+template<typename RandomAccessIt , typename Compare = _STD less<>>
+void pop_heap(RandomAccessIt first , RandomAccessIt last , Compare p)
+{
+	_STD swap(first [0] , last [-1]);
+	_make_heaplfy(first , last - first - 1 , 0 , p);
+}
+
+template<typename RandomAccessIt , typename Compare = _STD less<>>
+void push_back(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+{
+	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
+	dist_type dist = last - first;
+	dist_type par = _heap_parent(dist - 1);
+	dist_type now = dist - 1;
+	for (; now>0;)
+	{
+		if (p(first [par] , first [now]))
+		{
+			_STD swap(first [par] , first [now]);
+			if (par == 0)
+				break;
+			else
+			{
+				now = par;
+				par = _heap_parent(now);
+			}
+		}
+		else
+			break;
+	}
+}
+
+template<typename RandomAccessIt , typename Compare = _STD less<>>
+void sort_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+{
+	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
+	dist_type dist = last - first;
+	for (--dist; dist != 0; --dist)
+	{
+		_STD swap(first [0] , first [dist]);
+		_make_heaplfy(first , dist , 0 , p);
+	}
+}
+
+template<typename T , typename Compare = _STD less<>>
+inline const T& max(const T& a , const T& b , Compare p = Compare())
+{
+	return (p(a , b)) ? b : a;
+}
+
+template<typename ForwardIt , typename Compare = _STD less<>>
+ForwardIt max_element(ForwardIt first , ForwardIt last , Compare p = Compare())
+{
+	if (first == last)
+		return last;
+	ForwardIt it = first;
+	for (++first; first != last; ++first)
+	{
+		if (p(*it , *first))
+			it = first;
+	}
+	return it;
+}
+
+template<typename T , typename Compare = _STD less<>>
+T max(_STD initializer_list<T> il , Compare p = Compare())
+{
+	return *max_element(il.begin() , il.end() , p);
+}
+
+template<typename T , typename Compare = _STD less<>>
+inline const T& min(const T& a , const T& b , Compare p = Compare())
+{
+	return (p(b , a)) ? b : a;
+}
+
+template<typename ForwardIt , typename Compare = _STD less<>>
+ForwardIt min_element(ForwardIt first , ForwardIt last , Compare p = Compare())
+{
+	if (first == last)
+		return last;
+	ForwardIt it = fisrt;
+	for (++first; first != last; ++first)
+	{
+		if (p(*first , *it))
+			it = first;
+	}
+	return it;
+}
+
+template<typename T , typename Compare = _STD less<>>
+T min(_STD initializer_list<T> il , Compare p = Compare())
+{
+	return *min_element(il.begin() , il.end() , p);
+}
+
+template<typename T , typename Compare = _STD less<>>
+_STD pair<const T& , const T&> minmax(const T& a , const T& b , Compare p = Compare())
+{
+	return (p(b , a)) ? _STD make_pair<const T& , const T&>(b , a) :
+		_STD make_pair<const T& , const T&>(a , b);
+}
+
+template<typename ForwardIt , typename Compare = _STD less<>>
+_STD pair<ForwardIt , ForwardIt> minmax_element(ForwardIt first , ForwardIt last , Compare p = Compare())
+{
+	if (first == last)
+		return _STD make_pair(last , last);
+
+	ForwardIt min = min_element(first , last , p);
+	ForwardIt max = first;
+	for (++first; first != last; ++first)
+	{
+		if (p(*max , *first))
+			max = first;
+		else if (!p(*first , *max))
+			max = first;
+	}
+	return _STD make_pair(min , max);
+}
+
+template<typename T , typename Compare = _STD less<>>
+_STD pair<T , T> minmax(_STD initializer_list<T> il , Compare p = Compare())
+{
+	auto ret = minmax_element(il.begin() , il.end() , p);
+	return _STD make_pair(*(ret.first) , *(ret.second));
 }
 
 
