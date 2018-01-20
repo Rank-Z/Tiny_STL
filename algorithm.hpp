@@ -10,8 +10,6 @@
 
 #define _STD ::std::
 
-
-
 template<typename InputIt , typename UnaryPred>
 inline bool all_of(InputIt first , InputIt last , UnaryPred pred)
 {
@@ -516,7 +514,7 @@ OutputIt reverse_copy(BidirectionalIt first , BidirectionalIt last , OutputIt de
 }
 
 template<typename ForwardIt>
-ForwardIt rotate(ForwardIt first , ForwardIt new_first , ForwardIt last) //TOTEST
+ForwardIt rotate(ForwardIt first , ForwardIt new_first , ForwardIt last)
 {
 	ForwardIt mid = new_first;
 	ForwardIt new_mid = mid;
@@ -1243,8 +1241,132 @@ _STD pair<T , T> minmax(_STD initializer_list<T> il , Compare p = Compare())
 	return _STD make_pair(*(ret.first) , *(ret.second));
 }
 
+template<typename InputIt1 , typename InputIt2 , typename Compare = _STD less<>>
+bool lexicographical_compare(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , Compare p = Compare())
+{
+	for (; first1 != last1 && first2 != last2;)
+	{
+		if (p(*first1 , *first2))
+			return true;
+		else if (p(*first2 , *first1))
+			return false;
+		else
+		{
+			++first1;
+			++first2;
+		}
+	}
+	if (first1 == last1 && first2 != last2)
+		return true;
+	else
+		return false;
+}
 
+template<typename ForwardIt1 , typename ForwardIt2 , typename BinaryPred = _STD less<>>
+bool is_permutation(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2 , BinaryPred p = BinaryPred())
+{
+	_STD pair<ForwardIt1 , ForwardIt2> new_fisrst = mismatch(first1 , last1 , first2 , p);
+	first1 = new_fisrst.first;
+	first2 = new_fisrst.second;
+	ForwardIt1 it = first1;
+	ForwardIt2 last2 = first2;
+	_STD advance(last2 , _STD distance(first1 , last1));
+	for (; it != last1; ++it)
+	{
+		auto lambda1 = [it , p] (typename _STD iterator_traits<ForwardIt1>::reference val) {return p(*it , val); };
+		auto lambda2 = [it , p] (typename _STD iterator_traits<ForwardIt2>::reference val) {return p(*it , val); };
 
+		if (find_if(first1 , it , lambda1))
+			continue;
+		else
+		{
+			if (count_if(first1 , last1 , lambda1) != count_if(first2 , last2 , lambda2))
+				return false;
+		}
+	}
+	return true;
+}
+
+template<typename ForwardIt1 , typename ForwardIt2 , typename BinaryPred = _STD less<>>
+bool is_permutation(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2 , ForwardIt2 last2 , BinaryPred p = BinaryPred())
+{
+	if (_STD distance(first1 , last1) != _STD distance(first2 , last2))
+		return false;
+
+	_STD pair<ForwardIt1 , ForwardIt2> new_first = mismatch(first1 , last1 , first2 , last2 , p);
+	first1 = new_first.first;
+	first2 = new_first.second;
+	ForwardIt1 it = first1;
+	for (; it != last1; ++it)
+	{
+		auto lambda1 = [it , p] (typename _STD iterator_traits<ForwardIt1>::reference val) {return p(*it , val); };
+		auto lambda2 = [it , p] (typename _STD iterator_traits<ForwardIt2>::reference val) {return p(*it , val); };
+
+		if (find_if(first1 , it , lambda1))
+			continue;
+		else
+		{
+			if (count_if(first1 , last1 , lambda1) != count_if(first2 , last2 , lambda2))
+				return false;
+		}
+	}
+	return true;
+}
+
+template<typename BidirectionalIt , typename Compare = _STD less<>>
+bool next_premutation(BidirectionalIt first , BidirectionalIt last , Compare p = Compare())
+{
+	if (first == last)
+		return false;
+	BidirectionalIt it = last;
+	--it;
+	if (first == it)
+		return false;
+	for (BidirectionalIt i1; it != first;)
+	{
+		i1 = it;
+		--it;
+		if (p(*it , *i1))
+		{
+			BidirectionalIt i2 = last;
+			while (!p(*it , *--i2))
+				;
+			iter_swap(it , i2);
+			reverse(i1 , last);
+			return true;
+		}
+	}
+	sort(first , last , p);
+	return false;
+}
+
+template<typename BidirectionalIt , typename Compare = _STD less<>>
+bool prev_permutation(BidirectionalIt first , BidirectionalIt last , Compare p = Compare())
+{
+	if (first == last)
+		return false;
+	BidirectionalIt it = last;
+	--it;
+	if (first == it)
+		return false;
+	for (BidirectionalIt i1; it != first;)
+	{
+		i1 = it;
+		--it;
+		if (p(*i1 , *it))
+		{
+			BidirectionalIt i2 = last;
+			while (!p(*--i2 , *it))
+				;
+			iter_swap(it , i2);
+			reverse(i1 , last);
+			return true;
+		}
+	}
+	sort(first , last , p);
+	reverse(first , last);
+	return false;
+}
 
 
 #endif // !STL_ALGORITHM_HPP
