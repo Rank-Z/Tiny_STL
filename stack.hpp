@@ -20,7 +20,7 @@ public:
 		:c_(cont)
 	{   }
 
-	explicit stack(Container&& cont)
+	explicit stack(Container&& cont=Container())
 		:c_(_STD move(cont))
 	{   }
 
@@ -32,28 +32,32 @@ public:
 		:c_(_STD move(right.c_))
 	{   }
 
-	//TODO:need TMP from here
-	template<typename Allocator>
+	template<typename Allocator,
+		class =_STD enable_if_t<_STD uses_allocator_v<container_type,Allocator>>>
 	explicit stack(const Allocator& alloc)
 		:c_(alloc)
 	{   }
 
-	template<typename Allocator>
+	template<typename Allocator,
+		class=_STD enable_if_t<_STD uses_allocator_v<container_type, Allocator>>>
 	stack(const Container&right, const Allocator& alloc)
 		: c_(right, alloc)
 	{   }
 
-	template<typename Allocator>
+	template<typename Allocator,
+		class=_STD enable_if_t<_STD uses_allocator_v<container_type, Allocator>>>
 	stack(Container&& right, const Allocator& alloc)
 		: c_(_STD move(right), alloc)
 	{   }
 
-	template<typename Allocator>
+	template<typename Allocator,
+		class=_STD enable_if_t<_STD uses_allocator_v<container_type, Allocator>>>
 	stack(const stack&right, const Allocator& alloc)
 		: c_(right.c_, alloc)
 	{   }
 
-	template<typename Allocator>
+	template<typename Allocator,
+		class=_STD enable_if_t<_STD uses_allocator_v<container_type, Allocator>>>
 	stack(stack&& right, const Allocator& alloc)
 		: c_(_STD move(right), alloc)
 	{   }
