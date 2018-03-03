@@ -662,21 +662,22 @@ bool is_partitioned(InputIt first , InputIt last , UnaryPred p)
 }
 
 template<typename ForwardIt , typename UnaryPred>
-ForwardIt partition(ForwardIt first , ForwardIt last , UnaryPred p)
+ForwardIt partition(ForwardIt first , ForwardIt last , UnaryPred p) //TODO:debug
 {
 	for (; first != last;)
 		if (!p(*first))
 			break;
 		else
 			++first;
-
-	for (ForwardIt it = first;; it != last;)
+	if (first!=last)
 	{
-		++it;
-		if (p(*it))
+		for (ForwardIt it=first+1; it!=last; ++it)
 		{
-			iter_swap(first , it);
-			++first;
+			if (p(*it))
+			{
+				iter_swap(first, it);
+				++first;
+			}
 		}
 	}
 
