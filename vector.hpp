@@ -9,7 +9,7 @@
 #define _STD ::std::
 
 
-template<typename T,typename Allocator=_STD allocator<T>>
+template<typename T, typename Allocator=_STD allocator<T>>
 class vector
 {
 public:
@@ -38,8 +38,8 @@ public:
 		space_end_=first_+4;
 	}
 
-	vector(size_type count,const value_type& value)
-		:vector(count,value,allocator_type())
+	vector(size_type count, const value_type& value)
+		:vector(count, value, allocator_type())
 	{   }
 
 	vector(size_type count, const value_type& value, const allocator_type& alloc)
@@ -61,7 +61,7 @@ public:
 	}
 
 	explicit vector(size_type count)
-		:vector(count,allocator_type())
+		:vector(count, allocator_type())
 	{   }
 
 	vector(size_type count, const allocator_type& alloc)
@@ -74,15 +74,15 @@ public:
 	}
 
 	template<typename InputIt>
-	vector(InputIt first,InputIt last)
-		:vector(first,last,allocator_type())
+	vector(InputIt first, InputIt last)
+		:vector(first, last, allocator_type())
 	{   }
 
 	template<typename InputIt>
 	vector(InputIt first, InputIt last, const allocator_type& alloc)
 		: alloc_(alloc)
 	{
-		size_type dist = _STD distance(first, last);
+		size_type dist=_STD distance(first, last);
 		make_size(dist);
 
 		end_=first_;
@@ -91,15 +91,15 @@ public:
 	}
 
 	vector(const vector& right)
-		:vector(right.begin(),right.end(),right.get_allocator())
+		:vector(right.begin(), right.end(), right.get_allocator())
 	{   }
 
-	vector(const vector& right,const allocator_type& alloc)
-		:vector(right.begin(),right.end(),alloc)
+	vector(const vector& right, const allocator_type& alloc)
+		:vector(right.begin(), right.end(), alloc)
 	{   }
 
 	vector(vector&& right) noexcept
-		:first_(right.first_),end_(right.end_),space_end_(right.space_end_),
+		: first_(right.first_), end_(right.end_), space_end_(right.space_end_),
 		alloc_(_STD move(right.alloc_))
 	{   }
 
@@ -109,7 +109,7 @@ public:
 	{   }
 
 	vector(_STD initializer_list<T> il)
-		:vector(il,allocator_type())
+		:vector(il, allocator_type())
 	{   }
 
 	vector(_STD initializer_list<T> il, const allocator_type& alloc)
@@ -117,7 +117,7 @@ public:
 	{
 		size_type count=il.size();
 		make_size(count);
-		
+
 		auto from=il.begin();
 		auto end=il.end();
 		end_=first_;
@@ -163,7 +163,7 @@ public:
 	{
 		if (il.size()>(capacity()))
 		{
-			throw 
+			throw
 				_STD range_error("initializer_list range must be small than vector size");
 		}
 		clear();
@@ -244,7 +244,7 @@ public:
 
 	const_reference front() const
 	{
-		if(empty())
+		if (empty())
 			throw _STD out_of_range("vector front() throw when vector is empty");
 
 		return (*first_);
@@ -394,7 +394,7 @@ public:
 			{
 				*rit=(*(rit-1));
 			}
-			
+
 			::new (new_pos) value_type(_STD forward<Args>(args)...);
 			return new_pos;
 		}
@@ -455,7 +455,7 @@ public:
 			end_=dest;
 			first_=new_first;
 			space_end_=first_+size;
-			
+
 			return ret;
 		}
 		else
@@ -467,7 +467,7 @@ public:
 				alloc_.destroy(rit);
 			}
 			for (iterator it=pos; count!=0; --count)
-				alloc_.construct(it++,value);
+				alloc_.construct(it++, value);
 
 			return const_cast<iterator>(pos);
 		}
@@ -623,7 +623,7 @@ public:
 		_STD swap(alloc_, right.alloc_);
 	}
 
-	
+
 
 private:
 	void make_size(size_type count)
@@ -670,6 +670,54 @@ private:
 	allocator_type alloc_;
 };
 
+template<typename T, typename Allocator>
+bool operator==(const vector<T, Allocator>& left,
+	const vector<T, Allocator>& right)
+{
+	return _STD equal(left.cbegin(), left.cend(), right.cbegin(), right.cend());
+}
+
+template<typename T, typename Allocator>
+bool operator!=(const vector<T, Allocator>& left,
+	const vector<T, Allocator>& right)
+{
+	return (!(left==right));
+}
+
+template<typename T, typename Allocator>
+bool operator<(const vector<T, Allocator>& left,
+	const vector<T, Allocator>& right)
+{
+	return _STD lexicographical_compare(left.cbegin(), left.cend(), right.cbegin(), right.cend());
+}
+
+template<typename T, typename Allocator>
+bool operator>=(const vector<T, Allocator>& left,
+	const vector<T, Allocator>& right)
+{
+	return (!(left<right));
+}
+
+template<typename T, typename Allocator>
+bool operator>(const vector<T, Allocator>& left,
+	const vector<T, Allocator>& right)
+{
+	return _STD lexicographical_compare(right.cbegin(), right.cend(), left.cbegin(), left.cend());
+}
+
+template<typename T, typename Allocator>
+bool operator<=(const vector<T, Allocator>& left,
+	const vector<T, Allocator>& right)
+{
+	return (!(left>right));
+}
+
+template<typename T, typename Allocator>
+void swap(vector<T, Allocator>& left,
+	vector<T, Allocator>& right) noexcept(noexcept(left.swap(right)))
+{
+	left.swap(right);
+}
 
 
 #endif // !VECTOR_HPP
