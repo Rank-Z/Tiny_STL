@@ -11,17 +11,19 @@
 #define _STD ::std::
 
 template<typename InputIt , typename UnaryPred>
-inline bool all_of(InputIt first , InputIt last , UnaryPred pred)
+inline bool
+all_of(InputIt first , InputIt last , UnaryPred pred)
 {
 	for (; first != last; ++first)
 		if (!pred(*first))
 			return false
 
-			return true;
+	return true;
 }
 
 template<typename InputIt , typename UnaryPred>
-inline bool any_of(InputIt first , InputIt last , UnaryPred pred)
+inline bool
+any_of(InputIt first , InputIt last , UnaryPred pred)
 {
 	for (; first != last; ++first)
 		if (pred(*first))
@@ -31,7 +33,8 @@ inline bool any_of(InputIt first , InputIt last , UnaryPred pred)
 }
 
 template<typename InputIt , typename UnaryPred>
-inline bool none_of(InputIt first , InputIt last , UnaryPred pred)
+inline bool
+none_of(InputIt first , InputIt last , UnaryPred pred)
 {
 	for (; first != last; ++first)
 		if (pred(*first))
@@ -41,7 +44,8 @@ inline bool none_of(InputIt first , InputIt last , UnaryPred pred)
 }
 
 template<typename InputIt , typename UnaryFunction>
-inline UnaryFunction for_each(InputIt first , InputIt last , UnaryFunction f)
+inline UnaryFunction
+for_each(InputIt first , InputIt last , UnaryFunction f)
 {
 	for (; first != last; ++first)
 		f(*first);
@@ -50,7 +54,8 @@ inline UnaryFunction for_each(InputIt first , InputIt last , UnaryFunction f)
 }
 
 template<typename InputIt , typename Size , typename UnaryFunction>
-inline InputIt for_each_n(InputIt first , Size n , UnaryFunction f)
+inline InputIt
+for_each_n(InputIt first , Size n , UnaryFunction f)
 {
 	for (; n; --n)
 	{
@@ -86,7 +91,8 @@ count_if(InputIt first , InputIt last , UnaryPred pred)
 }
 
 template<typename InputIt1 , typename InputIt2 , typename BinaryPred = _STD equal_to<>>
-_STD pair<InputIt1 , InputIt2> mismatch(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , BinaryPred p = BinaryPred())
+_STD pair<InputIt1 , InputIt2>
+mismatch(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , BinaryPred p = BinaryPred())
 {
 	for (; first1 != last1 && p(*first1 , *first2);)
 	{
@@ -98,7 +104,8 @@ _STD pair<InputIt1 , InputIt2> mismatch(InputIt1 first1 , InputIt1 last1 , Input
 }
 
 template<typename InputIt1 , typename InputIt2 , typename BinaryPred = _STD equal_to<>>
-_STD pair<InputIt1 , InputIt2> mismatch(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , BinaryPred p = BinaryPred())
+_STD pair<InputIt1 , InputIt2>
+mismatch(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , BinaryPred p = BinaryPred())
 {
 	for (; first1 != last1 && first2 != last2 && p(*first1 , *first2))
 	{
@@ -110,7 +117,8 @@ _STD pair<InputIt1 , InputIt2> mismatch(InputIt1 first1 , InputIt1 last1 , Input
 }
 
 template<typename InputIt1 , typename InputIt2 , typename BinaryPred = _STD equal_to<>>
-bool equal(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , BinaryPred p = BinaryPred())
+bool
+equal(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , BinaryPred p = BinaryPred())
 {
 	for (; first1 != last1; ++first1 , ++first2)
 		if (!p(*first1 , *first2))
@@ -120,7 +128,8 @@ bool equal(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , BinaryPred p = B
 }
 
 template<typename InputIt1 , typename InputIt2 , typename BinaryPred = _STD equal_to<>>
-bool equal(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , BinaryPred p = BinaryPred())
+bool
+equal(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , BinaryPred p = BinaryPred())
 {
 	if (_STD distance(first1 , last1) != _STD distance(first2 , last2))
 		return false;
@@ -133,7 +142,8 @@ bool equal(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 ,
 }
 
 template<typename ForwardIt1 , typename ForwardIt2 , typename BinaryPred = _STD equal_to<>>
-ForwardIt1 search(ForwardIt1 first , ForwardIt1 last , ForwardIt2 s_first , ForwardIt2 s_last , BinaryPred p = BinaryPred())
+ForwardIt1
+search(ForwardIt1 first , ForwardIt1 last , ForwardIt2 s_first , ForwardIt2 s_last , BinaryPred p = BinaryPred())
 {
 	if (s_first == s_last)
 		return first;
@@ -159,7 +169,8 @@ ForwardIt1 search(ForwardIt1 first , ForwardIt1 last , ForwardIt2 s_first , Forw
 }
 
 template<typename ForwardIt , typename Size , typename T , typename BinaryPred = _STD equal_to<>>
-ForwardIt search_n(ForwardIt first , ForwardIt last , Size count , const T& val , BinaryPred p = BinaryPred())
+ForwardIt
+search_n(ForwardIt first , ForwardIt last , Size count , const T& val , BinaryPred p = BinaryPred())
 {
 	if (first == last)
 		return last;
@@ -189,7 +200,8 @@ ForwardIt search_n(ForwardIt first , ForwardIt last , Size count , const T& val 
 }
 
 template<typename InputIt , typename T>
-InputIt find(InputIt first , InputIt last , const T& val)
+InputIt
+find(InputIt first , InputIt last , const T& val)
 {
 	for (; first != last; ++first)
 		if (*first == val)
@@ -199,7 +211,8 @@ InputIt find(InputIt first , InputIt last , const T& val)
 }
 
 template<typename InputIt , typename UnaryPred>
-InputIt find_if(InputIt first , InputIt last , UnaryPred p)
+InputIt
+find_if(InputIt first , InputIt last , UnaryPred p)
 {
 	for (; first != last; ++first)
 		if (p(*first))
@@ -209,7 +222,8 @@ InputIt find_if(InputIt first , InputIt last , UnaryPred p)
 }
 
 template<typename InputIt , typename UnaryPred>
-InputIt find_if_not(InputIt first , InputIt last , UnaryPred p)
+InputIt
+find_if_not(InputIt first , InputIt last , UnaryPred p)
 {
 	for (; first != last; ++first)
 		if (!p(*first))
@@ -219,7 +233,8 @@ InputIt find_if_not(InputIt first , InputIt last , UnaryPred p)
 }
 
 template<typename ForwardIt1 , typename ForwardIt2 , typename BinaryPred = _STD equal_to<>>
-ForwardIt1 find_end(ForwardIt1 first , ForwardIt1 last , ForwardIt2 s_first , ForwardIt2 s_last , BinaryPred p = BinaryPred())
+ForwardIt1
+find_end(ForwardIt1 first , ForwardIt1 last , ForwardIt2 s_first , ForwardIt2 s_last , BinaryPred p = BinaryPred())
 {
 	if (s_first == s_last)
 		return last;
@@ -235,7 +250,8 @@ ForwardIt1 find_end(ForwardIt1 first , ForwardIt1 last , ForwardIt2 s_first , Fo
 }
 
 template<typename InputIt , typename ForwardIt , typename BinaryPred = _STD equal_to<>>
-InputIt find_first_of(InputIt first , InputIt last , ForwardIt s_first , ForwardIt s_last , BinaryPred p = BinaryPred())
+InputIt
+find_first_of(InputIt first , InputIt last , ForwardIt s_first , ForwardIt s_last , BinaryPred p = BinaryPred())
 {
 	for (; first != last; ++first)
 		for (ForwardIt it = s_first; it != s_last; ++it)
@@ -246,7 +262,8 @@ InputIt find_first_of(InputIt first , InputIt last , ForwardIt s_first , Forward
 }
 
 template<typename ForwardIt , typename BinaryPred = _STD equal_to<>>
-ForwardIt adjacent_find(ForwardIt first , ForwardIt last , BinaryPred p = BinaryPred())
+ForwardIt
+adjacent_find(ForwardIt first , ForwardIt last , BinaryPred p = BinaryPred())
 {
 	if (first == last)
 		return last;
@@ -260,7 +277,8 @@ ForwardIt adjacent_find(ForwardIt first , ForwardIt last , BinaryPred p = Binary
 }
 
 template<typename InputIt , typename OutputIt>
-OutputIt copy(InputIt first , InputIt last , OutputIt dest_first)
+OutputIt
+copy(InputIt first , InputIt last , OutputIt dest_first)
 {
 	for (; first != last; ++first , ++dest_first)
 		*dest_first = *first;
@@ -269,7 +287,8 @@ OutputIt copy(InputIt first , InputIt last , OutputIt dest_first)
 }
 
 template<typename InputIt , typename OutputIt , typename UnaryPred>
-OutputIt copy_if(InputIt first , InputIt last , OutputIt dest_first , UnaryPred p)
+OutputIt
+copy_if(InputIt first , InputIt last , OutputIt dest_first , UnaryPred p)
 {
 	for (; first != last; ++first)
 		if (p(*first))
@@ -282,7 +301,8 @@ OutputIt copy_if(InputIt first , InputIt last , OutputIt dest_first , UnaryPred 
 }
 
 template<typename InputIt , typename Size , typename OutputIt>
-OutputIt copy_n(InputIt first , Size count , OutputIt dest_first)
+OutputIt
+copy_n(InputIt first , Size count , OutputIt dest_first)
 {
 	for (Size i = 0; i < count; ++i)
 		*dest_first++ = *first++;
@@ -291,7 +311,8 @@ OutputIt copy_n(InputIt first , Size count , OutputIt dest_first)
 }
 
 template<typename BidirectionalIt1 , typename BidirectionalIt2>
-BidirectionalIt2 copy_backward(BidirectionalIt1 first , BidirectionalIt1 last , BidirectionalIt2 dest_last)
+BidirectionalIt2
+copy_backward(BidirectionalIt1 first , BidirectionalIt1 last , BidirectionalIt2 dest_last)
 {
 	for (; first != last;)
 		*(--dest_last) = *(--last);
@@ -300,7 +321,8 @@ BidirectionalIt2 copy_backward(BidirectionalIt1 first , BidirectionalIt1 last , 
 }
 
 template<typename InputIt , typename OutputIt>
-OutputIt move(InputIt first , InputIt last , OutputIt dest_first)
+OutputIt
+move(InputIt first , InputIt last , OutputIt dest_first)
 {
 	for (; first != last; ++first , ++dest_first)
 		*dest_first = _STD move(*first);
@@ -309,7 +331,8 @@ OutputIt move(InputIt first , InputIt last , OutputIt dest_first)
 }
 
 template<typename BidirectionalIt1 , typename BidirectionalIt2>
-BidirectionalIt2 move_backward(BidirectionalIt1 first , BidirectionalIt1 last , BidirectionalIt2 dest_last)
+BidirectionalIt2
+move_backward(BidirectionalIt1 first , BidirectionalIt1 last , BidirectionalIt2 dest_last)
 {
 	for (; first != last;)
 		*(--dest_last) = _STD move(*(--last));
@@ -318,14 +341,16 @@ BidirectionalIt2 move_backward(BidirectionalIt1 first , BidirectionalIt1 last , 
 }
 
 template<typename ForwardIt , typename T>
-void fill(ForwardIt first , ForwardIt last , const T& val)
+void
+fill(ForwardIt first , ForwardIt last , const T& val)
 {
 	for (; first != last; ++first)
 		*first = val;
 }
 
 template<typename OutputIt , typename Size , typename T>
-OutputIt fill_n(OutputIt first , Size count , const T& val)
+OutputIt
+fill_n(OutputIt first , Size count , const T& val)
 {
 	for (Size cur_count = 0; cur_count < count; ++cur_count)
 		*(first++) = val;
@@ -334,7 +359,8 @@ OutputIt fill_n(OutputIt first , Size count , const T& val)
 }
 
 template<typename InputIt , typename OutputIt , typename UnaryPred>
-OutputIt transform(InputIt first , InputIt last , OutputIt dest_first , UnaryPred p)
+OutputIt
+transform(InputIt first , InputIt last , OutputIt dest_first , UnaryPred p)
 {
 	for (; first != last; ++first , ++dest_first)
 		*dest_first = p(*first);
@@ -343,7 +369,8 @@ OutputIt transform(InputIt first , InputIt last , OutputIt dest_first , UnaryPre
 }
 
 template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename BinaryPred>
-OutputIt transform(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , OutputIt dest_first , BinaryPred p)
+OutputIt
+transform(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , OutputIt dest_first , BinaryPred p)
 {
 	for (; first1 != last1; ++first1 , ++first2 , ++dest_first)
 		*dest_first = p(first1 , first2);
@@ -352,14 +379,16 @@ OutputIt transform(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , OutputIt
 }
 
 template<typename ForwardIt , typename Generator>
-void generate(ForwardIt first , ForwardIt last , Generator g)
+void
+generate(ForwardIt first , ForwardIt last , Generator g)
 {
 	for (; first != last; ++first)
 		*first = g();
 }
 
 template<typename OutputIt , typename Size , typename Generator>
-OutputIt generate_n(OutputIt first , Size count , Generator g)
+OutputIt
+generate_n(OutputIt first , Size count , Generator g)
 {
 	for (Size cur_size = 0; cur_size < count; ++cur_size)
 		*(first++) = g();
@@ -368,7 +397,8 @@ OutputIt generate_n(OutputIt first , Size count , Generator g)
 }
 
 template<typename ForwardIt , typename T>
-ForwardIt remove(ForwardIt first , ForwardIt last , const T& val)
+ForwardIt
+remove(ForwardIt first , ForwardIt last , const T& val)
 {
 	first = find(first , last , val);
 	if (first != last)
@@ -383,7 +413,8 @@ ForwardIt remove(ForwardIt first , ForwardIt last , const T& val)
 }
 
 template<typename ForwardIt , typename UnaryPred>
-ForwardIt remove_if(ForwardIt first , ForwardIt last , UnaryPred p)
+ForwardIt
+remove_if(ForwardIt first , ForwardIt last , UnaryPred p)
 {
 	first = find_if(first , last , p);
 	if (first != last)
@@ -398,7 +429,8 @@ ForwardIt remove_if(ForwardIt first , ForwardIt last , UnaryPred p)
 }
 
 template<typename InputIt , typename OutputIt , typename T>
-OutputIt remove_copy(InputIt first , InputIt last , OutputIt dest_first , const T& val)
+OutputIt
+remove_copy(InputIt first , InputIt last , OutputIt dest_first , const T& val)
 {
 	for (; first != last; ++first)
 		if (*first != val)
@@ -408,7 +440,8 @@ OutputIt remove_copy(InputIt first , InputIt last , OutputIt dest_first , const 
 }
 
 template<typename InputIt , typename OutputIt , typename UnaryPred>
-OutputIt remove_copy_if(InputIt first , InputIt last , OutputIt dest_first , UnaryPred p)
+OutputIt
+remove_copy_if(InputIt first , InputIt last , OutputIt dest_first , UnaryPred p)
 {
 	for (; first != last; ++first)
 		if (!p(*first))
@@ -418,7 +451,8 @@ OutputIt remove_copy_if(InputIt first , InputIt last , OutputIt dest_first , Una
 }
 
 template<typename ForwardIt , typename T>
-void replace(ForwardIt first , ForwardIt last , const T& old_val , const T& new_val)
+void
+replace(ForwardIt first , ForwardIt last , const T& old_val , const T& new_val)
 {
 	for (; first != last; ++first)
 		if (*first == old_val)
@@ -426,7 +460,8 @@ void replace(ForwardIt first , ForwardIt last , const T& old_val , const T& new_
 }
 
 template<typename ForwardIt , typename UnaryPred , typename T>
-void replace_if(ForwardIt first , ForwardIt last , UnaryPred p , const T& new_val)
+void
+replace_if(ForwardIt first , ForwardIt last , UnaryPred p , const T& new_val)
 {
 	for (; first != last; ++first)
 		if (p(*first))
@@ -434,7 +469,8 @@ void replace_if(ForwardIt first , ForwardIt last , UnaryPred p , const T& new_va
 }
 
 template<typename InputIt , typename OutputIt , typename T>
-OutputIt replace_copy(InputIt first , InputIt last , OutputIt dest_first , const T& old_val , const T& new_val)
+OutputIt
+replace_copy(InputIt first , InputIt last , OutputIt dest_first , const T& old_val , const T& new_val)
 {
 	for (; first != last; ++first , ++dest_first)
 		if (*first != old_val)
@@ -446,7 +482,8 @@ OutputIt replace_copy(InputIt first , InputIt last , OutputIt dest_first , const
 }
 
 template<typename InputIt , typename OutputIt , typename UnaryPred , typename T>
-OutputIt replace_copy_if(InputIt first , InputIt last , OutputIt dest_first , UnaryPred p , const T& new_val)
+OutputIt
+replace_copy_if(InputIt first , InputIt last , OutputIt dest_first , UnaryPred p , const T& new_val)
 {
 	for (; first != last; ++first , ++dest_first)
 		if (!p(*first))
@@ -458,7 +495,8 @@ OutputIt replace_copy_if(InputIt first , InputIt last , OutputIt dest_first , Un
 }
 
 template<typename T>
-void swap(T& a , T& b)//since C++ 11 ,this swap is in <utility>
+void
+swap(T& a , T& b) // since C++ 11 ,this swap is in <utility>
 {
 	T temp(_STD move(a));
 	a = _STD move(b);
@@ -466,20 +504,23 @@ void swap(T& a , T& b)//since C++ 11 ,this swap is in <utility>
 }
 
 template<typename T , _STD size_t N>
-void swap(T(&a) [N] , T(&b) [N])
+void
+swap(T(&a) [N] , T(&b) [N])
 {
 	for (int i = 0; i != N; ++i)
 		swap(a [i] , b [i]);
 }
 
 template<typename ForwardIt1 , typename ForwardIt2>
-void iter_swap(ForwardIt1 it_a , ForwardIt2 it_b)
+void
+iter_swap(ForwardIt1 it_a , ForwardIt2 it_b)
 {
 	_STD swap(*it_a , *it_b);
 }
 
 template<typename ForwardIt1 , typename ForwardIt2>
-ForwardIt2 swap_ranges(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2)
+ForwardIt2
+swap_ranges(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2)
 {
 	for (; first1 != last1; ++first1 , ++first2)
 		iter_swap(first1 , first2);
@@ -488,7 +529,8 @@ ForwardIt2 swap_ranges(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2)
 }
 
 template<typename BidirectionalIt>
-void reverse(BidirectionalIt first , BidirectionalIt last)
+void
+reverse(BidirectionalIt first , BidirectionalIt last)
 {
 	for (; first != last;)
 	{
@@ -502,7 +544,8 @@ void reverse(BidirectionalIt first , BidirectionalIt last)
 }
 
 template<typename BidirectionalIt , typename OutputIt>
-OutputIt reverse_copy(BidirectionalIt first , BidirectionalIt last , OutputIt dest_first)
+OutputIt
+reverse_copy(BidirectionalIt first , BidirectionalIt last , OutputIt dest_first)
 {
 	for (; first != last;)
 	{
@@ -510,11 +553,13 @@ OutputIt reverse_copy(BidirectionalIt first , BidirectionalIt last , OutputIt de
 		*dest_first = *last;
 		++dest_first;
 	}
+
 	return dest_first;
 }
 
 template<typename ForwardIt>
-ForwardIt rotate(ForwardIt first , ForwardIt new_first , ForwardIt last)
+ForwardIt
+rotate(ForwardIt first , ForwardIt new_first , ForwardIt last)
 {
 	ForwardIt mid = new_first;
 	ForwardIt new_mid = mid;
@@ -547,7 +592,8 @@ ForwardIt rotate(ForwardIt first , ForwardIt new_first , ForwardIt last)
 }
 
 template<typename ForwardIt , typename OutputIt>
-OutputIt rotate_copy(ForwardIt first , ForwardIt new_first , ForwardIt last , OutputIt dest_first)
+OutputIt
+rotate_copy(ForwardIt first , ForwardIt new_first , ForwardIt last , OutputIt dest_first)
 {
 	dest_first = copy(new_first , last , dest_first);
 	dest_first = copy(first , new_first , dest_first);
@@ -556,7 +602,8 @@ OutputIt rotate_copy(ForwardIt first , ForwardIt new_first , ForwardIt last , Ou
 }
 
 template<typename RandomAccessIt , typename RandomGenerator>
-void shuffle(RandomAccessIt first , RandomAccessIt last , RandomGenerator&& g)
+void
+shuffle(RandomAccessIt first , RandomAccessIt last , RandomGenerator&& g)
 {
 	using diff_t = typename _STD iterator_traits<RandomAccessIt>::difference_type;
 	diff_t distance = last - first;
@@ -570,7 +617,8 @@ void shuffle(RandomAccessIt first , RandomAccessIt last , RandomGenerator&& g)
 }
 
 template<typename InputIt , typename OutputIt , typename Distance , typename RandomGenerator>
-OutputIt sample(InputIt first , InputIt last , OutputIt out , Distance n , RandomGenerator&& g) //since C++ 17
+OutputIt
+sample(InputIt first , InputIt last , OutputIt out , Distance n , RandomGenerator&& g) //since C++ 17
 {
 	using diff_t = typename _STD iterator_traits<InputIt>::difference_type;
 	diff_t _distance = _STD distance(first , last);
@@ -603,7 +651,8 @@ OutputIt sample(InputIt first , InputIt last , OutputIt out , Distance n , Rando
 }
 
 template<typename ForwardIt , typename BinaryPred = _STD equal_to<>>
-ForwardIt unique(ForwardIt first , ForwardIt last , BinaryPred p = BinaryPred())
+ForwardIt
+unique(ForwardIt first , ForwardIt last , BinaryPred p = BinaryPred())
 {
 	first = adjacent_find(first , last , p);
 	if (first == last)
@@ -624,7 +673,8 @@ ForwardIt unique(ForwardIt first , ForwardIt last , BinaryPred p = BinaryPred())
 }
 
 template<typename InputIt , typename OutputIt , typename BinaryPred = _STD equal_to<>>
-OutputIt unique_copy(InputIt first , InputIt last , OutputIt dest_first , BinaryPred p = BinaryPred())
+OutputIt
+unique_copy(InputIt first , InputIt last , OutputIt dest_first , BinaryPred p = BinaryPred())
 {
 	InputIt it = adjacent_find(first , last);
 	if (it != last)
@@ -648,7 +698,8 @@ OutputIt unique_copy(InputIt first , InputIt last , OutputIt dest_first , Binary
 }
 
 template<typename InputIt , typename UnaryPred>
-bool is_partitioned(InputIt first , InputIt last , UnaryPred p)
+bool
+is_partitioned(InputIt first , InputIt last , UnaryPred p)
 {
 	for (; first != last; ++first)
 		if (!p(*first))
@@ -662,13 +713,13 @@ bool is_partitioned(InputIt first , InputIt last , UnaryPred p)
 }
 
 template<typename ForwardIt , typename UnaryPred>
-ForwardIt partition(ForwardIt first , ForwardIt last , UnaryPred p) //TODO:debug
+ForwardIt
+partition(ForwardIt first , ForwardIt last , UnaryPred p)
 {
-	for (; first != last;)
+	for (; first != last;++first)
 		if (!p(*first))
 			break;
-		else
-			++first;
+
 	if (first!=last)
 	{
 		for (ForwardIt it=first+1; it!=last; ++it)
@@ -685,7 +736,8 @@ ForwardIt partition(ForwardIt first , ForwardIt last , UnaryPred p) //TODO:debug
 }
 
 template<typename InputIt , typename OutputIt1 , typename OutputIt2 , typename UnaryPred>
-_STD pair<OutputIt1 , OutputIt2> partition_copy
+_STD pair<OutputIt1 , OutputIt2>
+partition_copy
 (InputIt first , InputIt last , OutputIt1 dest_first_true , OutputIt2 dest_first_false , UnaryPred p)
 {
 	for (; first != last; ++first)
@@ -700,7 +752,8 @@ _STD pair<OutputIt1 , OutputIt2> partition_copy
 }
 
 template<typename BidirectionalIt , typename UnaryPred>
-BidirectionalIt stable_partition(BidirectionalIt first , BidirectionalIt last , UnaryPred p)
+BidirectionalIt
+stable_partition(BidirectionalIt first , BidirectionalIt last , UnaryPred p)
 {
 	for (; first != last;)
 		if (!p(*first))
@@ -726,7 +779,8 @@ BidirectionalIt stable_partition(BidirectionalIt first , BidirectionalIt last , 
 }
 
 template<typename ForwardIt , typename UnaryPred>
-ForwardIt partition_point(ForwardIt first , ForwardIt last , UnaryPred p)
+ForwardIt
+partition_point(ForwardIt first , ForwardIt last , UnaryPred p)
 {
 	for (; first != last;)
 		if (p(*first))
@@ -738,7 +792,8 @@ ForwardIt partition_point(ForwardIt first , ForwardIt last , UnaryPred p)
 }
 
 template<typename ForwardIt , typename Compare = _STD less<>>
-bool is_sorted(ForwardIt first , ForwardIt last , Compare p = Compare())
+bool
+is_sorted(ForwardIt first , ForwardIt last , Compare p = Compare())
 {
 	if (first == last)
 		return true;
@@ -757,7 +812,8 @@ bool is_sorted(ForwardIt first , ForwardIt last , Compare p = Compare())
 }
 
 template<typename ForwardIt , typename Compare = _STD less<>>
-ForwardIt is_sorted_until(ForwardIt first , ForwardIt last , Compare p = Compare())
+ForwardIt
+is_sorted_until(ForwardIt first , ForwardIt last , Compare p = Compare())
 {
 	if (first == last)
 		return first;
@@ -776,7 +832,8 @@ ForwardIt is_sorted_until(ForwardIt first , ForwardIt last , Compare p = Compare
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
-void sort(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+void
+sort(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 {
 	constexpr int _Insertion_Sort_Max = 32;
 	typename _STD iterator_traits<RandomAccessIt>::difference_type dist = last - first;
@@ -787,7 +844,8 @@ void sort(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
-void partail_sort(RandomAccessIt first , RandomAccessIt mid , RandomAccessIt last , Compare p = Compare())
+void
+partail_sort(RandomAccessIt first , RandomAccessIt mid , RandomAccessIt last , Compare p = Compare())
 {
 	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
 	dist_type dist = last - first;
@@ -804,7 +862,8 @@ void partail_sort(RandomAccessIt first , RandomAccessIt mid , RandomAccessIt las
 }
 
 template<typename InputIt , typename RandomAccessIt , typename Compare = _STD less<>>
-RandomAccessIt partial_sort_copy
+RandomAccessIt
+partial_sort_copy
 (InputIt first , InputIt last , RandomAccessIt dest_first , RandomAccessIt dest_last , Compare p = Compare())
 {
 	RandomAccessIt end = dest_first;
@@ -831,13 +890,15 @@ RandomAccessIt partial_sort_copy
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
-void stable_sort(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+void
+stable_sort(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 {
 	_insertion_sort(first , last , p);
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
-void nth_element(RandomAccessIt first , RandomAccessIt nth , RandomAccessIt last , Compare p = Compare())
+void
+nth_element(RandomAccessIt first , RandomAccessIt nth , RandomAccessIt last , Compare p = Compare())
 {
 	if (nth == last || nth == first)
 		return;
@@ -880,7 +941,8 @@ void nth_element(RandomAccessIt first , RandomAccessIt nth , RandomAccessIt last
 }
 
 template<typename ForwardIt , typename T , typename Compare = _STD less<>>
-ForwardIt lower_bound(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
+ForwardIt
+lower_bound(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
 {
 	using dist_type = typename _STD iterator_traits<ForwardIt>::difference_type;
 	dist_type length = _STD distance(first , last);
@@ -902,7 +964,8 @@ ForwardIt lower_bound(ForwardIt first , ForwardIt last , const T& value , Compar
 }
 
 template<typename ForwardIt , typename T , typename Compare = _STD less<>>
-ForwardIt upper_bound(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
+ForwardIt
+upper_bound(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
 {
 	using dist_type = typename _STD iterator_traits<ForwardIt>::difference_type;
 	dist_type length = _STD distance(first , last);
@@ -924,7 +987,8 @@ ForwardIt upper_bound(ForwardIt first , ForwardIt last , const T& value , Compar
 }
 
 template<typename ForwardIt , typename T , typename Compare = _STD less<>>
-bool binary_search(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
+bool
+binary_search(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
 {
 	first = lower_bound(first , last , value , p);
 	if (first == last)
@@ -936,13 +1000,15 @@ bool binary_search(ForwardIt first , ForwardIt last , const T& value , Compare p
 }
 
 template<typename ForwardIt , typename T , typename Compare = _STD less<>>
-_STD pair<ForwardIt , ForwardIt> equal_range(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
+_STD pair<ForwardIt , ForwardIt>
+equal_range(ForwardIt first , ForwardIt last , const T& value , Compare p = Compare())
 {
 	return _STD make_pair(lower_bound(first , last , value , p) , upper_bound(first , last , value , p));
 }
 
 template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename Compare = _STD less<>>
-OutputIt merge(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_frst , Compare p = Compare())
+OutputIt
+merge(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_frst , Compare p = Compare())
 {
 	for (; (first1 != last1) && (first2 != last2);)
 	{
@@ -960,7 +1026,8 @@ OutputIt merge(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 las
 }
 
 template<typename BidirectionalIt , typename Compare = _STD less<>>
-void inplace_merge(BidirectionalIt first , BidirectionalIt mid , BidirectionalIt last , Compare p = Compare())
+void
+inplace_merge(BidirectionalIt first , BidirectionalIt mid , BidirectionalIt last , Compare p = Compare())
 {
 	for (; mid != last; ++mid)
 	{
@@ -976,7 +1043,8 @@ void inplace_merge(BidirectionalIt first , BidirectionalIt mid , BidirectionalIt
 }
 
 template<typename InputIt1 , typename InputIt2 , typename Compare = _STD less<>>
-bool includes(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , Compare p = Compare())
+bool
+includes(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , Compare p = Compare())
 {
 	for (; first1 != last1; ++first1)
 	{
@@ -996,7 +1064,8 @@ bool includes(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last
 }
 
 template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename Compare = _STD less<>>
-OutputIt set_difference
+OutputIt
+set_difference
 (InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_first , Compare p = Compare())
 {
 	for (; first1 != last1;)
@@ -1017,7 +1086,8 @@ OutputIt set_difference
 }
 
 template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename Compare = _STD less<>>
-OutputIt set_intersection
+OutputIt
+set_intersection
 (InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_first , Compare p = Compare())
 {
 	for (; first1 != last1;)
@@ -1035,7 +1105,8 @@ OutputIt set_intersection
 }
 
 template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename Compare = _STD less<>>
-OutputIt set_symmetric_difference
+OutputIt
+set_symmetric_difference
 (InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_first , Compare p = Compare())
 {
 	for (; first1 != last1;)
@@ -1061,7 +1132,8 @@ OutputIt set_symmetric_difference
 }
 
 template<typename InputIt1 , typename InputIt2 , typename OutputIt , typename Compare = _STD less<>>
-OutputIt set_union
+OutputIt
+set_union
 (InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , OutputIt dest_first , Compare p = Compare())
 {
 	for (; first1 != last1;)
@@ -1088,7 +1160,8 @@ OutputIt set_union
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
-bool is_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+bool
+is_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 {
 	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
 	dist_type dist = last - first;
@@ -1099,14 +1172,16 @@ bool is_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
-RandomAccessIt is_heap_until(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+RandomAccessIt
+is_heap_until(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 {
 	_STD advance(first , _heap_test(first , last , p) - 1);
 	return first;
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
-void make_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+void
+make_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 {
 	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
 	dist_type dist = last - first;
@@ -1115,14 +1190,16 @@ void make_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare(
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
-void pop_heap(RandomAccessIt first , RandomAccessIt last , Compare p)
+void
+pop_heap(RandomAccessIt first , RandomAccessIt last , Compare p)
 {
 	_STD swap(first [0] , last [-1]);
 	_make_heaplfy(first , last - first - 1 , 0 , p);
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
-void push_back(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+void
+push_back(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 {
 	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
 	dist_type dist = last - first;
@@ -1147,7 +1224,8 @@ void push_back(RandomAccessIt first , RandomAccessIt last , Compare p = Compare(
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
-void sort_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
+void
+sort_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 {
 	using dist_type = typename _STD iterator_traits<RandomAccessIt>::difference_type;
 	dist_type dist = last - first;
@@ -1159,13 +1237,15 @@ void sort_heap(RandomAccessIt first , RandomAccessIt last , Compare p = Compare(
 }
 
 template<typename T , typename Compare = _STD less<>>
-inline const T& max(const T& a , const T& b , Compare p = Compare())
+inline const T&
+max(const T& a , const T& b , Compare p = Compare())
 {
 	return (p(a , b)) ? b : a;
 }
 
 template<typename ForwardIt , typename Compare = _STD less<>>
-ForwardIt max_element(ForwardIt first , ForwardIt last , Compare p = Compare())
+ForwardIt
+max_element(ForwardIt first , ForwardIt last , Compare p = Compare())
 {
 	if (first == last)
 		return last;
@@ -1185,13 +1265,15 @@ T max(_STD initializer_list<T> il , Compare p = Compare())
 }
 
 template<typename T , typename Compare = _STD less<>>
-inline const T& min(const T& a , const T& b , Compare p = Compare())
+inline const T&
+min(const T& a , const T& b , Compare p = Compare())
 {
 	return (p(b , a)) ? b : a;
 }
 
 template<typename ForwardIt , typename Compare = _STD less<>>
-ForwardIt min_element(ForwardIt first , ForwardIt last , Compare p = Compare())
+ForwardIt
+min_element(ForwardIt first , ForwardIt last , Compare p = Compare())
 {
 	if (first == last)
 		return last;
@@ -1211,14 +1293,16 @@ T min(_STD initializer_list<T> il , Compare p = Compare())
 }
 
 template<typename T , typename Compare = _STD less<>>
-_STD pair<const T& , const T&> minmax(const T& a , const T& b , Compare p = Compare())
+_STD pair<const T& , const T&>
+minmax(const T& a , const T& b , Compare p = Compare())
 {
 	return (p(b , a)) ? _STD make_pair<const T& , const T&>(b , a) :
 		_STD make_pair<const T& , const T&>(a , b);
 }
 
 template<typename ForwardIt , typename Compare = _STD less<>>
-_STD pair<ForwardIt , ForwardIt> minmax_element(ForwardIt first , ForwardIt last , Compare p = Compare())
+_STD pair<ForwardIt , ForwardIt>
+minmax_element(ForwardIt first , ForwardIt last , Compare p = Compare())
 {
 	if (first == last)
 		return _STD make_pair(last , last);
@@ -1236,14 +1320,16 @@ _STD pair<ForwardIt , ForwardIt> minmax_element(ForwardIt first , ForwardIt last
 }
 
 template<typename T , typename Compare = _STD less<>>
-_STD pair<T , T> minmax(_STD initializer_list<T> il , Compare p = Compare())
+_STD pair<T , T>
+minmax(_STD initializer_list<T> il , Compare p = Compare())
 {
 	auto ret = minmax_element(il.begin() , il.end() , p);
 	return _STD make_pair(*(ret.first) , *(ret.second));
 }
 
 template<typename InputIt1 , typename InputIt2 , typename Compare = _STD less<>>
-bool lexicographical_compare(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , Compare p = Compare())
+bool
+lexicographical_compare(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 , InputIt2 last2 , Compare p = Compare())
 {
 	for (; first1 != last1 && first2 != last2;)
 	{
@@ -1264,7 +1350,8 @@ bool lexicographical_compare(InputIt1 first1 , InputIt1 last1 , InputIt2 first2 
 }
 
 template<typename ForwardIt1 , typename ForwardIt2 , typename BinaryPred = _STD less<>>
-bool is_permutation(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2 , BinaryPred p = BinaryPred())
+bool
+is_permutation(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2 , BinaryPred p = BinaryPred())
 {
 	_STD pair<ForwardIt1 , ForwardIt2> new_fisrst = mismatch(first1 , last1 , first2 , p);
 	first1 = new_fisrst.first;
@@ -1289,7 +1376,8 @@ bool is_permutation(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2 , B
 }
 
 template<typename ForwardIt1 , typename ForwardIt2 , typename BinaryPred = _STD less<>>
-bool is_permutation(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2 , ForwardIt2 last2 , BinaryPred p = BinaryPred())
+bool
+is_permutation(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2 , ForwardIt2 last2 , BinaryPred p = BinaryPred())
 {
 	if (_STD distance(first1 , last1) != _STD distance(first2 , last2))
 		return false;
@@ -1315,7 +1403,8 @@ bool is_permutation(ForwardIt1 first1 , ForwardIt1 last1 , ForwardIt2 first2 , F
 }
 
 template<typename BidirectionalIt , typename Compare = _STD less<>>
-bool next_premutation(BidirectionalIt first , BidirectionalIt last , Compare p = Compare())
+bool
+next_premutation(BidirectionalIt first , BidirectionalIt last , Compare p = Compare())
 {
 	if (first == last)
 		return false;
@@ -1342,7 +1431,8 @@ bool next_premutation(BidirectionalIt first , BidirectionalIt last , Compare p =
 }
 
 template<typename BidirectionalIt , typename Compare = _STD less<>>
-bool prev_permutation(BidirectionalIt first , BidirectionalIt last , Compare p = Compare())
+bool
+prev_permutation(BidirectionalIt first , BidirectionalIt last , Compare p = Compare())
 {
 	if (first == last)
 		return false;
