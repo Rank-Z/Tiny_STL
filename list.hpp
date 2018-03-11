@@ -1,3 +1,6 @@
+#ifndef LIST_HPP
+#define LIST_HPP
+
 #include<memory>
 #include<vector>
 #include<algorithm>
@@ -805,3 +808,5 @@ inline bool operator>=(const list<_Ty>& _Left, const list<_Ty>& _Right)
 {
 	return !(_Left<_Right);
 }
+
+#endif // !LIST_HPP

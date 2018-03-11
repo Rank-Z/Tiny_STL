@@ -1,5 +1,5 @@
-#ifndef CONTAINERS_SET_HPP
-#define CONTAINERS_SET_HPP
+#ifndef SET_HPP
+#define SET_HPP
 
 #include"RB_Tree.hpp"
 #include<memory>
@@ -941,4 +941,4 @@ void swap(multiset<Key , Compare , Allocator>& left ,
 	left.swap(right);
 }
 
-#endif // ! CONTAINERS_SET_HPP
+#endif // ! SET_HPP

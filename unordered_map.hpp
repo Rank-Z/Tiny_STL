@@ -1,5 +1,5 @@
-#ifndef CONTAINERS_UNORDERED_MAP_HPP
-#define CONTAINERS_UNORDERED_MAP_HPP
+#ifndef UNORDERED_MAP_HPP
+#define UNORDERED_MAP_HPP
 #include"unordered_base.hpp"
 #include<xhash>
 #include<utility>
@@ -1317,4 +1317,4 @@ private:
 	}
 };
 
-#endif //CONTAINERS_UNORDERED_MAP_HPP
+#endif //UNORDERED_MAP_HPP

@@ -1,5 +1,5 @@
-#ifndef  CONTAINERS_MAP_HPP
-#define	 CONTAINERS_MAP_HPP
+#ifndef  MAP_HPP
+#define	 MAP_HPP
 
 #include"RB_Tree.hpp"
 #include<functional>
@@ -1010,4 +1010,4 @@ void swap(multimap<Key , T , Compare , Allocator>& left ,
 	left.swap(right);
 }
 
-#endif // ! CONTAINERS_MAP_HPP
+#endif // ! MAP_HPP

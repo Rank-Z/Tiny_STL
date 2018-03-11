@@ -1,5 +1,5 @@
-#ifndef CONTAINERS_UNORDERED_SET_HPP
-#define	CONTAINERS_UNORDERED_SET_HPP
+#ifndef UNORDERED_SET_HPP
+#define	UNORDERED_SET_HPP
 #include"unordered_base.hpp"
 #include<xhash>
 #include<vector>
@@ -1203,4 +1203,4 @@ public:
 
 };
 
-#endif //CONTAINERS_UNORDERED_SET_HPP
+#endif // UNORDERED_SET_HPP

@@ -1,5 +1,5 @@
-#ifndef STL_ALGORITHM_HPP
-#define STL_ALGORITHM_HPP
+#ifndef ALGORITHM_HPP
+#define ALGORITHM_HPP
 
 #include"algorithm_base.hpp"
 #include<utility>
@@ -1460,4 +1460,4 @@ prev_permutation(BidirectionalIt first , BidirectionalIt last , Compare p = Comp
 }
 
 
-#endif // !STL_ALGORITHM_HPP
+#endif // !ALGORITHM_HPP

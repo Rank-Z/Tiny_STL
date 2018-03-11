@@ -1,3 +1,6 @@
+#ifndef FORWARD_LIST
+#define FORWARD_LIST
+
 #include<memory>
 #include<initializer_list>
 #include<utility>
@@ -711,3 +714,5 @@ public:
 			_Splice_after(_Newfirst, *this, before_begin(), ++begin());
 	}
 };
+
+#endif // !FORWARD_LIST

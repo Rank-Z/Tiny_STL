@@ -1,3 +1,6 @@
+#ifndef ARRAY_HPP
+#define ARRAY_HPP
+
 #include<initializer_list>
 #include<memory>
 #include<stdexcept>
@@ -278,3 +281,6 @@ public:
 public:
 	_Ty _Elems[1];
 };
+
+
+#endif // !ARRAY_HPP
