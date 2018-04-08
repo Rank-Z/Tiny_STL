@@ -1,5 +1,5 @@
-#ifndef ALGORITHM_HPP
-#define ALGORITHM_HPP
+#ifndef STL_ALGORITHM_HPP
+#define STL_ALGORITHM_HPP
 
 #include"algorithm_base.hpp"
 #include<utility>
@@ -840,7 +840,7 @@ sort(RandomAccessIt first , RandomAccessIt last , Compare p = Compare())
 	if (dist < _Insertion_Sort_Max)
 		_insertion_sort(first , last , p);
 	else
-		_maxheap_sort(first , last , dist , p);
+		_maxheap_sort(first , dist , p);
 }
 
 template<typename RandomAccessIt , typename Compare = _STD less<>>
@@ -1460,4 +1460,4 @@ prev_permutation(BidirectionalIt first , BidirectionalIt last , Compare p = Comp
 }
 
 
-#endif // !ALGORITHM_HPP
+#endif // !STL_ALGORITHM_HPP

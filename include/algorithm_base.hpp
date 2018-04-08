@@ -26,6 +26,10 @@ void _insertion_sort(RandomAccessIt first , RandomAccessIt last , Compare p)
 
 }
 
+// FIXME
+// 这里的父节点、左右子节点计算中，有奇怪的+1，-1操作，这是因为以1开始计算但是实际表示以0开始导致
+// 测试过了，并没有问题
+
 template<typename Dist_type>
 inline Dist_type _heap_parent(Dist_type i)
 {
@@ -68,10 +72,9 @@ void _make_heaplfy(RandomAccessIt first , Dist_type size , Dist_type index , Com
 }
 
 template<typename RandomAccessIt , typename Dist_type , typename Compare>
-void _maxheap_sort(RandomAccessIt first , RandomAccessIt last , Dist_type dist , Compare p)
+void _maxheap_sort(RandomAccessIt first , Dist_type dist , Compare p)
 {
-	Dist_type dist = last - first;
-	for (Dist_type i = dist / 2; i >= 0; --i)
+	for (Dist_type i = dist / 2; i >= 0; --i) // FIXME: 这里有可能可以少一次循环，理由也是从0开始计数，但是多一次肯定不会出错
 		_make_heaplfy(first , dist , i , p);
 
 	for (Dist_type i = dist - 1; i != 0; --i)
@@ -136,8 +139,6 @@ _heap_test(RandomAccessIt first , RandomAccessIt last , Compare p)
 	}
 	return dist;
 }
-
-
 
 
 
