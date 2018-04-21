@@ -1,10 +1,10 @@
-#ifndef UNORDERED_SET_HPP
-#define	UNORDERED_SET_HPP
+#ifndef CONTAINERS_UNORDERED_SET_HPP
+#define	CONTAINERS_UNORDERED_SET_HPP
 #include"unordered_base.hpp"
 #include<xhash>
 #include<vector>
 #include<initializer_list>
-#include<exception>
+#include<stdexcept>
 #include<memory>
 #include<utility>
 
@@ -180,7 +180,7 @@ private:
 /*                                  unordered_set_base                                */
 
 template<typename Key ,
-	typename Hash ,
+	typename Hash,
 	typename Pred ,
 	typename Alloc>
 	class unordered_set_base :public unordered_base<uset_node<Key> , Hash , Pred , Alloc>
@@ -273,9 +273,9 @@ protected:
 /*                                       unordered_set                        */
 
 template<typename Key ,
-	typename Hash ,
+	typename Hash=std::hash<Key>,
 	typename Pred = _STD equal_to<Key> ,
-	typename Alloc = _STD allocator<uset_node<Key , T>>>
+	typename Alloc = _STD allocator<uset_node<Key>>>
 	class unordered_set :public unordered_set_base<Key , Hash , Pred , Alloc>
 {
 public:
@@ -734,7 +734,7 @@ public:
 /*                                                  unordered_multiset                      */
 
 template<typename Key ,
-	typename Hash ,
+	typename Hash=std::hash<Key>,
 	typename Pred = _STD equal_to<Key> ,
 	typename Alloc = _STD allocator<uset_node<Key , T>>>
 	class unordered_multiset :public unordered_set_base<Key , Hash , Pred , Alloc>
@@ -1203,4 +1203,4 @@ public:
 
 };
 
-#endif // UNORDERED_SET_HPP
+#endif //CONTAINERS_UNORDERED_SET_HPP
