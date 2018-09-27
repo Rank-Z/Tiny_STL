@@ -45,7 +45,7 @@ public:
 	set_const_iterator& operator++()
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "set_const_iterator operator++() out_of_range" };
+			throw STD out_of_range { "set_const_iterator operator++() out_of_range" };
 		np = np->next;
 		return *this;
 	}
@@ -53,7 +53,7 @@ public:
 	set_const_iterator operator++(int)
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "set_const_iterator operator++(int) out_of_range" };
+			throw STD out_of_range { "set_const_iterator operator++(int) out_of_range" };
 		set_const_iterator tmp (*this);
 		np = np->next;
 		return tmp;
@@ -62,7 +62,7 @@ public:
 	set_const_iterator& operator--()
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "set_const_iterator operator--() out_of_range" };
+			throw STD out_of_range { "set_const_iterator operator--() out_of_range" };
 		np = np->prev;
 		return *this;
 	}
@@ -70,7 +70,7 @@ public:
 	set_const_iterator operator--(int)
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "set_const_iterator operator--(int) out_of_range" };
+			throw STD out_of_range { "set_const_iterator operator--(int) out_of_range" };
 		set_const_iterator tmp (*this);
 		np = np->prev;
 		return tmp;
@@ -79,7 +79,7 @@ public:
 	const value_type& operator*() const
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "set_const_iterator operator--(int) out_of_range" };
+			throw STD out_of_range { "set_const_iterator operator--(int) out_of_range" };
 		return np->getkey();
 	}
 
@@ -130,7 +130,7 @@ public:
 	set_iterator& operator++()
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "set_iterator operator++() out_of_range" };
+			throw STD out_of_range { "set_iterator operator++() out_of_range" };
 		np = np->next;
 		return *this;
 	}
@@ -138,7 +138,7 @@ public:
 	set_iterator operator++(int)
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "set_iterator operator++(int) out_of_range" };
+			throw STD out_of_range { "set_iterator operator++(int) out_of_range" };
 		set_iterator tmp (*this);
 		np = np->next;
 		return tmp;
@@ -147,7 +147,7 @@ public:
 	set_iterator& operator--()
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "set_iterator operator--() out_of_range" };
+			throw STD out_of_range { "set_iterator operator--() out_of_range" };
 		np = np->prev;
 		return *this;
 	}
@@ -155,7 +155,7 @@ public:
 	set_iterator operator--(int)
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "set_iterator operator--(int) out_of_range" };
+			throw STD out_of_range { "set_iterator operator--(int) out_of_range" };
 		set_iterator tmp (*this);
 		np = np->prev;
 		return tmp;
@@ -164,7 +164,7 @@ public:
 	value_type& operator*() const
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "set_iterator operator*() out_of_range" };
+			throw STD out_of_range { "set_iterator operator*() out_of_range" };
 		return np->getkey();
 	}
 
@@ -274,8 +274,8 @@ protected:
 
 template<typename Key ,
 	typename Hash=std::hash<Key>,
-	typename Pred = _STD equal_to<Key> ,
-	typename Alloc = _STD allocator<uset_node<Key>>>
+	typename Pred = STD equal_to<Key> ,
+	typename Alloc = STD allocator<uset_node<Key>>>
 	class unordered_set :public unordered_set_base<Key , Hash , Pred , Alloc>
 {
 public:
@@ -284,8 +284,8 @@ public:
 	using hasher = Hash;
 	using key_equal = Pred;
 	using allocator_type = Alloc;
-	using pointer = typename _STD allocator_traits<Alloc>::pointer;				//just value_type*
-	using const_pointer = typename _STD allocator_traits<Alloc>::const_pointer;	//just const value_type*
+	using pointer = typename STD allocator_traits<Alloc>::pointer;				//just value_type*
+	using const_pointer = typename STD allocator_traits<Alloc>::const_pointer;	//just const value_type*
 	using reference = value_type & ;
 	using const_reference = const value_type&;
 	using size_type = size_t;
@@ -356,8 +356,8 @@ public:
 	}
 
 	unordered_set (unordered_set&& Right)
-		:unordered_set_base(_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
-			_STD move (Right._alloc))
+		:unordered_set_base(STD move (Right._buckets) , STD move (Right._hash) , STD move (Right._eql) ,
+			STD move (Right._alloc))
 	{
 		_size = Right.size ();
 		_last = Right._last;
@@ -365,7 +365,7 @@ public:
 	}
 
 	unordered_set (unordered_set&& Right , const allocator_type& alloc)
-		:unordered_set_base (_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
+		:unordered_set_base (STD move (Right._buckets) , STD move (Right._hash) , STD move (Right._eql) ,
 			alloc)
 	{
 		_size = Right.size ();
@@ -373,33 +373,33 @@ public:
 		_load_factor = Right.load_factor ();
 	}
 
-	unordered_set (_STD initializer_list<value_type> il ,
+	unordered_set (STD initializer_list<value_type> il ,
 		size_type n = 4 ,
 		const hasher&hf = hasher () ,
 		const key_equal& eql = key_equal () ,
 		const allocator_type& alloc = allocator_type ())
 		: unordered_set_base (n , hf , eql , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert (*it);
 	}
 
-	unordered_set (_STD initializer_list<value_type> il ,
+	unordered_set (STD initializer_list<value_type> il ,
 		size_type n ,
 		const allocator_type& alloc)
 		: unordered_set_base (n , hasher() , key_equal() , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert (*it);
 	}
 
-	unordered_set (_STD initializer_list<value_type> il ,
+	unordered_set (STD initializer_list<value_type> il ,
 		size_type n ,
 		const hasher&hf ,
 		const allocator_type& alloc)
 		: unordered_set_base (n , hf , key_equal() , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert (*it);
 	}
 
@@ -419,10 +419,10 @@ public:
 	unordered_set& operator=(unordered_set&& Right)
 	{
 		clear ();
-		_buckets = _STD move (_Right._buckets);
-		_hash = _STD move (_Right._hash);
-		_eql = _STD move (_Right._eql);
-		_alloc = _STD move (_Right._alloc);
+		_buckets = STD move (_Right._buckets);
+		_hash = STD move (_Right._hash);
+		_eql = STD move (_Right._eql);
+		_alloc = STD move (_Right._alloc);
 		_size = _Right._size;
 		_head = _Right._head;
 		_last = _Right._last;
@@ -430,10 +430,10 @@ public:
 		return *this;
 	}
 
-	unordered_set& operator=(_STD initializer_list<value_type> il)
+	unordered_set& operator=(STD initializer_list<value_type> il)
 	{
 		clear ();
-		for (_STD initializer_list<key_type>::iterator it = il.begin (); il != il.end (); ++it)
+		for (STD initializer_list<key_type>::iterator it = il.begin (); il != il.end (); ++it)
 			_insert (*it);
 		return *this;
 	}
@@ -550,30 +550,30 @@ public:
 		return _findkey (key) != nullptr;
 	}
 
-	_STD pair<iterator , iterator> equal_range(const key_type& key)
+	STD pair<iterator , iterator> equal_range(const key_type& key)
 	{
 		iterator ret (_findkey (key));
 		iterator ret2(ret);
 		++ret2;
-		return _STD make_pair(static_cast<iterator>(ret) , static_cast<iterator>(ret2));
+		return STD make_pair(static_cast<iterator>(ret) , static_cast<iterator>(ret2));
 	}
 
-	_STD pair<const_iterator , const_iterator> equal_range(const key_type& key) const
+	STD pair<const_iterator , const_iterator> equal_range(const key_type& key) const
 	{
 		const_iterator ret (_findkey (key));
 		const_iterator ret2(ret);
 		++ret2;
-		return _STD make_pair(static_cast<const_iterator>(ret) , static_cast<const_iterator>(ret));
+		return STD make_pair(static_cast<const_iterator>(ret) , static_cast<const_iterator>(ret));
 	}
 
 	template<typename ...Args>
-	_STD pair<iterator , bool> emplace(Args&&...args)
+	STD pair<iterator , bool> emplace(Args&&...args)
 	{
-		key_type k(_STD forward<Args>(args)...);
+		key_type k(STD forward<Args>(args)...);
 		if ((nodeptr np = _findkey(k)) != nullptr)
-			return _STD make_pair(static_cast<iterator>(np) , false);
+			return STD make_pair(static_cast<iterator>(np) , false);
 		else
-			return _STD make_pair(static_cast<iterator>(_insert(k)) , true);
+			return STD make_pair(static_cast<iterator>(_insert(k)) , true);
 	}
 
 	template <class... Args>
@@ -586,20 +586,20 @@ public:
 		return _insert(k);
 	}
 
-	_STD pair<iterator , bool> insert(const key_type& key)
+	STD pair<iterator , bool> insert(const key_type& key)
 	{
 		if (iterator it(_findkey(key)))
-			return _STD make_pair(it , false);
+			return STD make_pair(it , false);
 
-		return _STD make_pair(_insert(key) , true);
+		return STD make_pair(_insert(key) , true);
 	}
 
-	_STD pair<iterator , bool> insert(key_type&& key)
+	STD pair<iterator , bool> insert(key_type&& key)
 	{
 		if (iterator it(_findkey(key)))
-			return _STD make_pair(it , false);
+			return STD make_pair(it , false);
 
-		return _STD make_pair(_insert(_STD forward<key_type>(key)) , false);
+		return STD make_pair(_insert(STD forward<key_type>(key)) , false);
 	}
 
 	iterator insert(const_iterator hint , const key_type& key)
@@ -615,7 +615,7 @@ public:
 		if (_eql(*hint , key))
 			return hint;
 
-		return _insert(_STD forward<key_type>(key));
+		return _insert(STD forward<key_type>(key));
 	}
 
 	template<typename Iter>
@@ -625,7 +625,7 @@ public:
 			_insert(*first);
 	}
 
-	void insert(_STD initializer_list<value_type> il)
+	void insert(STD initializer_list<value_type> il)
 	{
 		insert(il.begin() , il.end());
 	}
@@ -659,14 +659,14 @@ public:
 
 	void swap(unordered_set& Right)
 	{
-		_STD swap(_buckets , Right._buckets);
-		_STD swap(_size , Right._size);
-		_STD swap(_hash , Right._hash);
-		_STD swap(_eql , Right._eql);
-		_STD swap(_alloc , Right._alloc);
-		_STD swap(_head , Right._head);
-		_STD swap(_last , Right._last);
-		_STD swap(_load_factor , Right._load_factor);
+		STD swap(_buckets , Right._buckets);
+		STD swap(_size , Right._size);
+		STD swap(_hash , Right._hash);
+		STD swap(_eql , Right._eql);
+		STD swap(_alloc , Right._alloc);
+		STD swap(_head , Right._head);
+		STD swap(_last , Right._last);
+		STD swap(_load_factor , Right._load_factor);
 	}
 
 	size_type bucket_count() const noexcept
@@ -735,8 +735,8 @@ public:
 
 template<typename Key ,
 	typename Hash=std::hash<Key>,
-	typename Pred = _STD equal_to<Key> ,
-	typename Alloc = _STD allocator<uset_node<Key , T>>>
+	typename Pred = STD equal_to<Key> ,
+	typename Alloc = STD allocator<uset_node<Key , T>>>
 	class unordered_multiset :public unordered_set_base<Key , Hash , Pred , Alloc>
 {
 public:
@@ -745,8 +745,8 @@ public:
 	using hasher = Hash;
 	using key_equal = Pred;
 	using allocator_type = Alloc;
-	using pointer = typename _STD allocator_traits<Alloc>::pointer;				//just value_type*
-	using const_pointer = typename _STD allocator_traits<Alloc>::const_pointer;	//just const value_type*
+	using pointer = typename STD allocator_traits<Alloc>::pointer;				//just value_type*
+	using const_pointer = typename STD allocator_traits<Alloc>::const_pointer;	//just const value_type*
 	using reference = value_type & ;
 	using const_reference = const value_type&;
 	using size_type = size_t;
@@ -822,8 +822,8 @@ public:
 	}
 
 	unordered_multiset(unordered_multiset&& Right)
-		:unordered_set_base(_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
-			_STD move (Right._alloc))
+		:unordered_set_base(STD move (Right._buckets) , STD move (Right._hash) , STD move (Right._eql) ,
+			STD move (Right._alloc))
 	{
 		_size = Right.size ();
 		_last = Right._last;
@@ -831,7 +831,7 @@ public:
 	}
 
 	unordered_multiset (unordered_multiset&& Right , const allocator_type& alloc)
-		:unordered_set_base (_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
+		:unordered_set_base (STD move (Right._buckets) , STD move (Right._hash) , STD move (Right._eql) ,
 			alloc)
 	{
 		_size = Right.size ();
@@ -839,30 +839,30 @@ public:
 		_load_factor = Right.load_factor ();
 	}
 
-	unordered_multiset(_STD initializer_list<value_type> il , size_type n , const hasher& hf = hasher() ,
+	unordered_multiset(STD initializer_list<value_type> il , size_type n , const hasher& hf = hasher() ,
 		const key_equal& eql = key_equal() , const allocator_type& alloc = allocator_type())
 		:unordered_set_base(n , hf , eql , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin(); it != il.end(); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin(); it != il.end(); ++it)
 			_insert_multiable(*it);
 	}
 
-	unordered_multiset(_STD initializer_list<value_type> il ,
+	unordered_multiset(STD initializer_list<value_type> il ,
 		size_type n ,
 		const allocator_type& alloc)
 		: unordered_set_base (n , hasher() , key_equal() , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert_multiable (*it);
 	}
 
-	unordered_multiset (_STD initializer_list<value_type> il ,
+	unordered_multiset (STD initializer_list<value_type> il ,
 		size_type n ,
 		const hasher&hf ,
 		const allocator_type& alloc)
 		: unordered_set_base (n , hf , key_equal() , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert_multiable (*it);
 	}
 
@@ -882,10 +882,10 @@ public:
 	unordered_multiset& operator=(unordered_multiset&& Right)
 	{
 		clear ();
-		_buckets = _STD move (_Right._buckets);
-		_hash = _STD move (_Right._hash);
-		_eql = _STD move (_Right._eql);
-		_alloc = _STD move (_Right._alloc);
+		_buckets = STD move (_Right._buckets);
+		_hash = STD move (_Right._hash);
+		_eql = STD move (_Right._eql);
+		_alloc = STD move (_Right._alloc);
 		_size = _Right._size;
 		_head = _Right._head;
 		_last = _Right._last;
@@ -893,10 +893,10 @@ public:
 		return *this;
 	}
 
-	unordered_multiset& operator=(_STD initializer_list<value_type> il)
+	unordered_multiset& operator=(STD initializer_list<value_type> il)
 	{
 		clear ();
-		for (_STD initializer_list<key_type>::iterator it = il.begin (); il != il.end (); ++it)
+		for (STD initializer_list<key_type>::iterator it = il.begin (); il != il.end (); ++it)
 			_insert_multiable (*it);
 		return *this;
 	}
@@ -1023,30 +1023,30 @@ public:
 		return ret;
 	}
 
-	_STD pair<iterator , iterator> equal_range(const key_type& key)
+	STD pair<iterator , iterator> equal_range(const key_type& key)
 	{
 		iterator ret1 = find(key);
 		iterator ret2(ret1);
 		size_type num = count(key);
 		for (; num; --num)
 			++ret2;
-		return _STD make_pair(ret1 , ret2);
+		return STD make_pair(ret1 , ret2);
 	}
 
-	_STD pair<const_iterator , const_iterator> equal_range(const key_type& key) const
+	STD pair<const_iterator , const_iterator> equal_range(const key_type& key) const
 	{
 		const_iterator ret1 = find(key);
 		const_iterator ret2(ret1);
 		size_type num = count(key);
 		for (; num; --num)
 			++ret2;
-		return _STD make_pair(ret1 , ret2);
+		return STD make_pair(ret1 , ret2);
 	}
 
 	template<typename ...Args>
 	iterator emplace(Args&&...args)
 	{
-		nodeptr np = new nodeptype<key_type> (_STD forward<Args>(args)...);
+		nodeptr np = new nodeptype<key_type> (STD forward<Args>(args)...);
 		nodeptr fp = _find(np->getkey());
 		if (fp == nullptr)
 			_insert_node(np);
@@ -1058,7 +1058,7 @@ public:
 	template<typename ...Args>
 	iterator emplace_hint(const_iterator hint , Args&&...args)
 	{
-		nodeptr np = new nodeptype<key_type> (_STD forward<Args>(args)...);
+		nodeptr np = new nodeptype<key_type> (STD forward<Args>(args)...);
 		if (_eql((*hint) , np->getkey()))
 			_insert_after(hint.np , np);
 		else
@@ -1078,7 +1078,7 @@ public:
 
 	iterator insert(value_type&& val)
 	{
-		return emplace(_STD forward<value_type>(val));
+		return emplace(STD forward<value_type>(val));
 	}
 
 	iterator insert(const_iterator hint , const value_type& val)
@@ -1098,7 +1098,7 @@ public:
 			_insert_multiable(*first);
 	}
 
-	void insert(_STD initializer_list<value_type> il)
+	void insert(STD initializer_list<value_type> il)
 	{
 		insert(il.begin() , il.end());
 	}
@@ -1118,7 +1118,7 @@ public:
 		size_type ret = count(key);
 		if (ret != 0)
 		{
-			_STD pair<iterator , iterator> itp = equal_range(key);
+			STD pair<iterator , iterator> itp = equal_range(key);
 			erase(itp.first , itp.second);
 		}
 		return ret;
@@ -1131,14 +1131,14 @@ public:
 
 	void swap(unordered_set& Right)
 	{
-		_STD swap(_buckets , Right._buckets);
-		_STD swap(_size , Right._size);
-		_STD swap(_hash , Right._hash);
-		_STD swap(_eql , Right._eql);
-		_STD swap(_alloc , Right._alloc);
-		_STD swap(_head , Right._head);
-		_STD swap(_last , Right._last);
-		_STD swap(_load_factor , Right._load_factor);
+		STD swap(_buckets , Right._buckets);
+		STD swap(_size , Right._size);
+		STD swap(_hash , Right._hash);
+		STD swap(_eql , Right._eql);
+		STD swap(_alloc , Right._alloc);
+		STD swap(_head , Right._head);
+		STD swap(_last , Right._last);
+		STD swap(_load_factor , Right._load_factor);
 	}
 
 	size_type bucket_count() const noexcept

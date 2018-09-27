@@ -6,25 +6,25 @@
 #include<utility>
 #include<iterator>
 #include<algorithm>
-#define _STD ::std::
+#define STD ::std::
 
 
-template<typename T, typename Allocator=_STD allocator<T>>
+template<typename T, typename Allocator=STD allocator<T>>
 class vector
 {
 public:
 	using value_type=T;
 	using allocator_type=Allocator;
-	using size_type=_STD size_t;
-	using difference_type=_STD ptrdiff_t;
+	using size_type=STD size_t;
+	using difference_type=STD ptrdiff_t;
 	using reference=value_type&;
 	using const_reference=const value_type&;
-	using pointer=typename _STD allocator_traits<Allocator>::pointer;
-	using const_pointer=typename _STD allocator_traits<Allocator>::const_pointer;
+	using pointer=typename STD allocator_traits<Allocator>::pointer;
+	using const_pointer=typename STD allocator_traits<Allocator>::const_pointer;
 	using iterator=T*;
 	using const_iterator=const T*;
-	using reverse_iterator=_STD reverse_iterator<iterator>;
-	using const_reverse_iterator=_STD reverse_iterator<const_iterator>;
+	using reverse_iterator=STD reverse_iterator<iterator>;
+	using const_reverse_iterator=STD reverse_iterator<const_iterator>;
 
 	vector() noexcept(noexcept(allocator_type()))
 		:vector(allocator_type())
@@ -56,7 +56,7 @@ public:
 			space_end_=first_+count;
 		}
 
-		_STD uninitialized_fill_n(first_, count, value);
+		STD uninitialized_fill_n(first_, count, value);
 		end_=first_+count;
 	}
 
@@ -69,7 +69,7 @@ public:
 	{
 		make_size(count);
 
-		_STD uninitialized_default_construct_n(first_, count);
+		STD uninitialized_default_construct_n(first_, count);
 		end_=first_+count;
 	}
 
@@ -82,7 +82,7 @@ public:
 	vector(InputIt first, InputIt last, const allocator_type& alloc)
 		: alloc_(alloc)
 	{
-		size_type dist=_STD distance(first, last);
+		size_type dist=STD distance(first, last);
 		make_size(dist);
 
 		end_=first_;
@@ -100,7 +100,7 @@ public:
 
 	vector(vector&& right) noexcept
 		: first_(right.first_), end_(right.end_), space_end_(right.space_end_),
-		alloc_(_STD move(right.alloc_))
+		alloc_(STD move(right.alloc_))
 	{   }
 
 	vector(vector&& right, const allocator_type& alloc)
@@ -108,11 +108,11 @@ public:
 		alloc_(alloc)
 	{   }
 
-	vector(_STD initializer_list<T> il)
+	vector(STD initializer_list<T> il)
 		:vector(il, allocator_type())
 	{   }
 
-	vector(_STD initializer_list<T> il, const allocator_type& alloc)
+	vector(STD initializer_list<T> il, const allocator_type& alloc)
 		:alloc_(alloc)
 	{
 		size_type count=il.size();
@@ -155,16 +155,16 @@ public:
 		first_=right.first_;
 		end_=right.end_;
 		space_end_=right.space_end_;
-		alloc_=_STD move(right.alloc_);
+		alloc_=STD move(right.alloc_);
 		return *this;
 	}
 
-	vector& operator=(_STD initializer_list<value_type> il)
+	vector& operator=(STD initializer_list<value_type> il)
 	{
 		if (il.size()>(capacity()))
 		{
 			throw
-				_STD range_error("initializer_list range must be small than vector size");
+				STD range_error("initializer_list range must be small than vector size");
 		}
 		clear();
 		for (auto it=il.begin(), it!=il.end(); ++it)
@@ -187,7 +187,7 @@ public:
 	void assign(InputIt first, InputIt last)
 	{
 		clear();
-		size_type new_size=_STD distance(first, last);
+		size_type new_size=STD distance(first, last);
 		if (new_size>capacity())
 		{
 			reserve(new_size);
@@ -198,7 +198,7 @@ public:
 		}
 	}
 
-	void assign(_STD initializer_list<value_type> il)
+	void assign(STD initializer_list<value_type> il)
 	{
 		assign(il.begin(), il.end());
 	}
@@ -211,7 +211,7 @@ public:
 	reference at(size_type index)
 	{
 		if (!(index<size()))
-			throw _STD out_of_range("vector at() out of range");
+			throw STD out_of_range("vector at() out of range");
 
 		return *(first_+index);
 	}
@@ -219,7 +219,7 @@ public:
 	const_reference at(size_type index) const
 	{
 		if (!(index<size()))
-			throw _STD out_of_range("vector at() out of range");
+			throw STD out_of_range("vector at() out of range");
 
 		return *(first_+index);
 	}
@@ -237,7 +237,7 @@ public:
 	reference front()
 	{
 		if (empty())
-			throw _STD out_of_range("vector front() throw when vector is empty");
+			throw STD out_of_range("vector front() throw when vector is empty");
 
 		return (*first_);
 	}
@@ -245,7 +245,7 @@ public:
 	const_reference front() const
 	{
 		if (empty())
-			throw _STD out_of_range("vector front() throw when vector is empty");
+			throw STD out_of_range("vector front() throw when vector is empty");
 
 		return (*first_);
 	}
@@ -253,7 +253,7 @@ public:
 	reference back()
 	{
 		if (empty())
-			throw _STD out_of_range("vector front() throw when vector is empty");
+			throw STD out_of_range("vector front() throw when vector is empty");
 
 		return (*(end_-1));
 	}
@@ -261,7 +261,7 @@ public:
 	const_reference back() const
 	{
 		if (empty())
-			throw _STD out_of_range("vector front() throw when vector is empty");
+			throw STD out_of_range("vector front() throw when vector is empty");
 
 		return (*(end_-1));
 	}
@@ -379,7 +379,7 @@ public:
 	{
 		if (pos==cend())
 		{
-			emplace_back(_STD forward<Args>(args)...);
+			emplace_back(STD forward<Args>(args)...);
 			return end();
 		}
 		else
@@ -395,7 +395,7 @@ public:
 				*rit=(*(rit-1));
 			}
 
-			::new (new_pos) value_type(_STD forward<Args>(args)...);
+			::new (new_pos) value_type(STD forward<Args>(args)...);
 			return new_pos;
 		}
 	}
@@ -405,7 +405,7 @@ public:
 	{
 		_expand_if_need();
 
-		alloc_.construct(end_, _STD forward<Args>(args)...);
+		alloc_.construct(end_, STD forward<Args>(args)...);
 		++end_;
 		return *(end_-1);
 	}
@@ -417,7 +417,7 @@ public:
 
 	iterator insert(const_iterator pos, value_type&& value)
 	{
-		return emplace(pos, _STD move(value));
+		return emplace(pos, STD move(value));
 	}
 
 	iterator insert(const_iterator pos, size_type count, const value_type& value)
@@ -444,7 +444,7 @@ public:
 			}
 			for (; sour!=end_;)
 			{
-				alloc_.construct(dest, _STD move(*sour));
+				alloc_.construct(dest, STD move(*sour));
 				++dest;
 				++sour;
 			}
@@ -476,7 +476,7 @@ public:
 	template<typename InputIt>
 	void insert(const_iterator pos, InputIt first, InputIt last)
 	{
-		difference_type dist=_STD distance(first, last);
+		difference_type dist=STD distance(first, last);
 		size_type count=static_cast<size_type>(dist);
 		if ((space_end_-end_)<count)
 		{
@@ -522,7 +522,7 @@ public:
 		}
 	}
 
-	iterator insert(const_iterator pos, _STD initializer_list<value_type> il)
+	iterator insert(const_iterator pos, STD initializer_list<value_type> il)
 	{
 		return insert(pos, il.begin(), il.end());
 	}
@@ -534,7 +534,7 @@ public:
 
 	void push_back(value_type&& value)
 	{
-		emplace_back(_STD move(value));
+		emplace_back(STD move(value));
 	}
 
 	void pop_back()
@@ -617,10 +617,10 @@ public:
 		noexcept(std::allocator_traits<allocator_type>::propagate_on_container_swap::value
 			||std::allocator_traits<allocator_type>::is_always_equal::value)
 	{
-		_STD swap(first_, right.first_);
-		_STD swap(end_, right.end_);
-		_STD swap(space_end_, right.space_end_);
-		_STD swap(alloc_, right.alloc_);
+		STD swap(first_, right.first_);
+		STD swap(end_, right.end_);
+		STD swap(space_end_, right.space_end_);
+		STD swap(alloc_, right.alloc_);
 	}
 
 
@@ -674,7 +674,7 @@ template<typename T, typename Allocator>
 bool operator==(const vector<T, Allocator>& left,
 	const vector<T, Allocator>& right)
 {
-	return _STD equal(left.cbegin(), left.cend(), right.cbegin(), right.cend());
+	return STD equal(left.cbegin(), left.cend(), right.cbegin(), right.cend());
 }
 
 template<typename T, typename Allocator>
@@ -688,7 +688,7 @@ template<typename T, typename Allocator>
 bool operator<(const vector<T, Allocator>& left,
 	const vector<T, Allocator>& right)
 {
-	return _STD lexicographical_compare(left.cbegin(), left.cend(), right.cbegin(), right.cend());
+	return STD lexicographical_compare(left.cbegin(), left.cend(), right.cbegin(), right.cend());
 }
 
 template<typename T, typename Allocator>
@@ -702,7 +702,7 @@ template<typename T, typename Allocator>
 bool operator>(const vector<T, Allocator>& left,
 	const vector<T, Allocator>& right)
 {
-	return _STD lexicographical_compare(right.cbegin(), right.cend(), left.cbegin(), left.cend());
+	return STD lexicographical_compare(right.cbegin(), right.cend(), left.cbegin(), left.cend());
 }
 
 template<typename T, typename Allocator>

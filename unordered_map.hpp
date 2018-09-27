@@ -15,7 +15,7 @@ class map_const_iterator
 public:
 	using key_type = Key;
 	using mapped_type = T;
-	using value_type = _STD pair<const Key , T>;
+	using value_type = STD pair<const Key , T>;
 	using node_type = umap_node<Key , T>;
 	using nodeptr = node_type * ;
 
@@ -46,7 +46,7 @@ public:
 	map_const_iterator& operator++()
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "map_const_iterator operator++() out_of_range" };
+			throw STD out_of_range { "map_const_iterator operator++() out_of_range" };
 		np = np->next;
 		return *this;
 	}
@@ -54,7 +54,7 @@ public:
 	map_const_iterator operator++(int)
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "map_const_iterator operator++(int) out_of_range" };
+			throw STD out_of_range { "map_const_iterator operator++(int) out_of_range" };
 		map_const_iterator tmp (*this);
 		np = np->next;
 		return tmp;
@@ -63,7 +63,7 @@ public:
 	map_const_iterator& operator--()
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "map_const_iterator operator--() out_of_range" };
+			throw STD out_of_range { "map_const_iterator operator--() out_of_range" };
 		np = np->prev;
 		return *this;
 	}
@@ -71,7 +71,7 @@ public:
 	map_const_iterator operator--(int)
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "map_const_iterator operator--(int) out_of_range" };
+			throw STD out_of_range { "map_const_iterator operator--(int) out_of_range" };
 		map_const_iterator tmp (*this);
 		np = np->prev;
 		return tmp;
@@ -80,7 +80,7 @@ public:
 	const value_type& operator*() const
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "map_const_iterator operator--(int) out_of_range" };
+			throw STD out_of_range { "map_const_iterator operator--(int) out_of_range" };
 		return np->data;
 	}
 
@@ -101,7 +101,7 @@ class map_iterator
 public:
 	using key_type = Key;
 	using mapped_type = T;
-	using value_type = _STD pair<const Key , T>;
+	using value_type = STD pair<const Key , T>;
 	using node_type = umap_node<Key , T>;
 	using nodeptr = node_type * ;
 
@@ -132,7 +132,7 @@ public:
 	map_iterator& operator++()
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "map_iterator operator++() out_of_range" };
+			throw STD out_of_range { "map_iterator operator++() out_of_range" };
 		np = np->next;
 		return *this;
 	}
@@ -140,7 +140,7 @@ public:
 	map_iterator operator++(int)
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "map_iterator operator++(int) out_of_range" };
+			throw STD out_of_range { "map_iterator operator++(int) out_of_range" };
 		map_iterator tmp (*this);
 		np = np->next;
 		return tmp;
@@ -149,7 +149,7 @@ public:
 	map_iterator& operator--()
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "map_iterator operator--() out_of_range" };
+			throw STD out_of_range { "map_iterator operator--() out_of_range" };
 		np = np->prev;
 		return *this;
 	}
@@ -157,7 +157,7 @@ public:
 	map_iterator operator--(int)
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "map_iterator operator--(int) out_of_range" };
+			throw STD out_of_range { "map_iterator operator--(int) out_of_range" };
 		map_iterator tmp (*this);
 		np = np->prev;
 		return tmp;
@@ -166,7 +166,7 @@ public:
 	value_type& operator*() const
 	{
 		if (np == nullptr)
-			throw _STD out_of_range { "map_iterator operator*() out_of_range" };
+			throw STD out_of_range { "map_iterator operator*() out_of_range" };
 		return np->data;
 	}
 
@@ -223,14 +223,14 @@ protected:
 	nodeptr _insert (const key_type& key)
 	{
 		mapped_type mp;
-		_STD pair<key_type , mapped_type> (key , mp) tmp;
-		return _insert (_STD move(tmp));
+		STD pair<key_type , mapped_type> (key , mp) tmp;
+		return _insert (STD move(tmp));
 	}
 
 	nodeptr _insert(value_type&& val)//withoutcheck
 	{
 		nodeptr np = _alloc.allocate(1) :
-			_alloc.construct(np , _STD forward<value_type>(val));
+			_alloc.construct(np , STD forward<value_type>(val));
 		_insert_node(np);
 		return np;
 	}
@@ -292,23 +292,23 @@ protected:
 
 template<typename Key ,
 	typename T ,
-	typename Hash = _STD hash<Key> ,
-	typename Pred = _STD equal_to<Key> ,
-	typename Alloc = _STD allocator<umap_node<Key , T>>>
+	typename Hash = STD hash<Key> ,
+	typename Pred = STD equal_to<Key> ,
+	typename Alloc = STD allocator<umap_node<Key , T>>>
 	class unordered_map :public unordered_map_base<Key , T , Hash , Pred , Alloc>
 {
 public:
 
 	using key_type = Key;
 	using mapped_type = T;
-	using value_type = _STD pair<const Key , T>;
+	using value_type = STD pair<const Key , T>;
 	using hasher = Hash;
 	using key_equal = Pred;
 	using allocator_type = Alloc;
 	using reference = value_type & ;
 	using const_reference = const value_type&;
-	using pointer = typename _STD allocator_traits<Alloc>::pointer;				//just value_type*
-	using const_pointer = typename _STD allocator_traits<Alloc>::const_pointer;	//just const value_type*
+	using pointer = typename STD allocator_traits<Alloc>::pointer;				//just value_type*
+	using const_pointer = typename STD allocator_traits<Alloc>::const_pointer;	//just const value_type*
 	using iterator = map_iterator<Key , T>;
 	using const_iterator = map_const_iterator<Key , T>;
 	using local_iterator = iterator;
@@ -379,8 +379,8 @@ public:
 	}
 
 	unordered_map (unordered_map&& Right)
-		:unordered_map_base(_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
-			_STD move (Right._alloc))
+		:unordered_map_base(STD move (Right._buckets) , STD move (Right._hash) , STD move (Right._eql) ,
+			STD move (Right._alloc))
 	{
 		_size = Right.size ();
 		_last = Right._last;
@@ -388,7 +388,7 @@ public:
 	}
 
 	unordered_map (unordered_map&& Right , const allocator_type& alloc)
-		:unordered_map_base (_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
+		:unordered_map_base (STD move (Right._buckets) , STD move (Right._hash) , STD move (Right._eql) ,
 			alloc)
 	{
 		_size = Right.size ();
@@ -396,33 +396,33 @@ public:
 		_load_factor = Right.load_factor ();
 	}
 
-	unordered_map (_STD initializer_list<value_type> il ,
+	unordered_map (STD initializer_list<value_type> il ,
 		size_type n = 4 ,
 		const hasher&hf = hasher () ,
 		const key_equal& eql = key_equal () ,
 		const allocator_type& alloc = allocator_type ())
 		: unordered_map_base (n , hf , eql , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert (*it);
 	}
 
-	unordered_map (_STD initializer_list<value_type> il ,
+	unordered_map (STD initializer_list<value_type> il ,
 		size_type n ,
 		const allocator_type& alloc)
 		: unordered_map_base (n , hasher() , key_equal() , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert (*it);
 	}
 
-	unordered_map (_STD initializer_list<value_type> il ,
+	unordered_map (STD initializer_list<value_type> il ,
 		size_type n ,
 		const hasher&hf ,
 		const allocator_type& alloc)
 		: unordered_map_base (n , hf , key_equal() , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert (*it);
 	}
 
@@ -442,10 +442,10 @@ public:
 	unordered_map& operator=(unordered_map&& Right)
 	{
 		clear ();
-		_buckets = _STD move (_Right._buckets);
-		_hash = _STD move (_Right._hash);
-		_eql = _STD move (_Right._eql);
-		_alloc = _STD move (_Right._alloc);
+		_buckets = STD move (_Right._buckets);
+		_hash = STD move (_Right._hash);
+		_eql = STD move (_Right._eql);
+		_alloc = STD move (_Right._alloc);
 		_size = _Right._size;
 		_head = _Right._head;
 		_last = _Right._last;
@@ -453,10 +453,10 @@ public:
 		return *this;
 	}
 
-	unordered_map& operator=(_STD initializer_list<value_type> il)
+	unordered_map& operator=(STD initializer_list<value_type> il)
 	{
 		clear ();
-		for (_STD initializer_list<key_type>::iterator it = il.begin (); il != il.end (); ++it)
+		for (STD initializer_list<key_type>::iterator it = il.begin (); il != il.end (); ++it)
 			_insert (*it);
 		return *this;
 	}
@@ -580,7 +580,7 @@ public:
 		if (np != nullptr)
 			return np->getmapped ();
 
-		throw _STD out_of_range { "unordered_map at() out_of_range" }
+		throw STD out_of_range { "unordered_map at() out_of_range" }
 	}
 
 	const mapped_type& at (const key_type& k) const
@@ -589,7 +589,7 @@ public:
 		if (np != nullptr)
 			return np->getmapped ();
 
-		throw _STD out_of_range { "unordered_map at() out_of_range" }
+		throw STD out_of_range { "unordered_map at() out_of_range" }
 	}
 
 	iterator find (const key_type& key)
@@ -607,42 +607,42 @@ public:
 		return _findkey (key) != nullptr;
 	}
 
-	_STD pair<iterator , iterator> equal_range (const key_type& key)
+	STD pair<iterator , iterator> equal_range (const key_type& key)
 	{
 		iterator ret (_findkey (key));
 		iterator ret2(ret);
 		++ret2;
-		return _STD make_pair (static_cast<iterator>(ret) , static_cast<iterator>(ret2));
+		return STD make_pair (static_cast<iterator>(ret) , static_cast<iterator>(ret2));
 	}
 
-	_STD pair<const_iterator , const_iterator> equal_range (const key_type& key) const
+	STD pair<const_iterator , const_iterator> equal_range (const key_type& key) const
 	{
 		const_iterator ret (_findkey (key));
 		const_iterator ret2(ret);
 		++ret2;
-		return _STD make_pair (static_cast<const_iterator>(ret) , static_cast<const_iterator>(ret2));
+		return STD make_pair (static_cast<const_iterator>(ret) , static_cast<const_iterator>(ret2));
 	}
 
 	template<typename ...Args>
-	_STD pair<iterator , bool> emplace (Args&&...args)
+	STD pair<iterator , bool> emplace (Args&&...args)
 	{
-		umap_node<key_type , mapped_type> tnode (_STD forward<Args>(args)...);
+		umap_node<key_type , mapped_type> tnode (STD forward<Args>(args)...);
 		nodeptr np = _findkey (tnode.getkey ());
 		if (np != nullptr)
 		{
 			np->getmapped () = tnode.getmapped ();
-			return _STD make_pair (static_cast<iterator>(np) , false);
+			return STD make_pair (static_cast<iterator>(np) , false);
 		}
 		else
 		{
-			return _STD make_pair (static_cast<iterator>(_insert (tnode)) , true);
+			return STD make_pair (static_cast<iterator>(_insert (tnode)) , true);
 		}
 	}
 
 	template<typename ...Args>
 	iterator emplace_hint (const_iterator position , Args&&...args)
 	{
-		umap_node<key_type , mapped_type> tnode (_STD forward<Args> (args)...);
+		umap_node<key_type , mapped_type> tnode (STD forward<Args> (args)...);
 		if ((*position).first == tnode.getkey ())
 		{
 			(*position).second = tnode.getmapped ();
@@ -658,22 +658,22 @@ public:
 		return np;
 	}
 
-	_STD pair<iterator , bool> insert (const value_type& val)
+	STD pair<iterator , bool> insert (const value_type& val)
 	{
 		nodeptr np = _findkey (val.first);
 		if (np != nullptr)
-			return _STD make_pair (static_cast<iterator>(np) , false);
+			return STD make_pair (static_cast<iterator>(np) , false);
 		else
-			return _STD make_pair (static_cast<iterator>(_insert(val) , false));
+			return STD make_pair (static_cast<iterator>(_insert(val) , false));
 	}
 
-	_STD pair<iterator , bool> insert(value_type&& val)
+	STD pair<iterator , bool> insert(value_type&& val)
 	{
 		nodeptr np = _findkey(val.first);
 		if (np != nullptr)
-			return _STD make_pair (static_cast<iterator>(np) , false);
+			return STD make_pair (static_cast<iterator>(np) , false);
 		else
-			return _STD make_pair (static_cast<iterator>(_insert(val) , false));
+			return STD make_pair (static_cast<iterator>(_insert(val) , false));
 	}
 
 	iterator insert(const_iterator hint , const value_type& val)
@@ -705,7 +705,7 @@ public:
 			insert(*first);
 	}
 
-	void insert(_STD initializer_list<value_type> il)
+	void insert(STD initializer_list<value_type> il)
 	{
 		insert(il.begin() , il.end());
 	}
@@ -739,14 +739,14 @@ public:
 
 	void swap(unordered_map& Right)
 	{
-		_STD swap(_buckets , Right._buckets);
-		_STD swap(_size , Right._size);
-		_STD swap(_hash , Right._hash);
-		_STD swap(_eql , Right._eql);
-		_STD swap(_alloc , Right._alloc);
-		_STD swap(_head , Right._head);
-		_STD swap(_last , Right._last);
-		_STD swap(_load_factor , Right._load_factor);
+		STD swap(_buckets , Right._buckets);
+		STD swap(_size , Right._size);
+		STD swap(_hash , Right._hash);
+		STD swap(_eql , Right._eql);
+		STD swap(_alloc , Right._alloc);
+		STD swap(_head , Right._head);
+		STD swap(_last , Right._last);
+		STD swap(_load_factor , Right._load_factor);
 	}
 
 	size_type bucket_count() const noexcept
@@ -815,23 +815,23 @@ public:
 
 template<typename Key ,
 	typename T ,
-	typename Hash = _STD hash<Key> ,
-	typename Pred = _STD equal_to<Key> ,
-	typename Alloc = _STD allocator<umap_node<Key , T>>>
+	typename Hash = STD hash<Key> ,
+	typename Pred = STD equal_to<Key> ,
+	typename Alloc = STD allocator<umap_node<Key , T>>>
 	class unordered_multimap :public unordered_map_base<Key , T , Hash , Pred , Alloc>
 {
 public:
 
 	using key_type = Key;
 	using mapped_type = T;
-	using value_type = _STD pair<const Key , T>;
+	using value_type = STD pair<const Key , T>;
 	using hasher = Hash;
 	using key_equal = Pred;
 	using allocator_type = Alloc;
 	using reference = value_type & ;
 	using const_reference = const value_type&;
-	using pointer = typename _STD allocator_traits<Alloc>::pointer;				//just value_type*
-	using const_pointer = typename _STD allocator_traits<Alloc>::const_pointer;	//just const value_type*
+	using pointer = typename STD allocator_traits<Alloc>::pointer;				//just value_type*
+	using const_pointer = typename STD allocator_traits<Alloc>::const_pointer;	//just const value_type*
 	using iterator = map_iterator<Key , T>;
 	using const_iterator = map_const_iterator<Key , T>;
 	using local_iterator = iterator;
@@ -905,8 +905,8 @@ private:
 	}
 
 	unordered_multimap(unordered_multimap&& Right)
-		:unordered_map_base(_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
-			_STD move (Right._alloc))
+		:unordered_map_base(STD move (Right._buckets) , STD move (Right._hash) , STD move (Right._eql) ,
+			STD move (Right._alloc))
 	{
 		_size = Right.size ();
 		_last = Right._last;
@@ -914,7 +914,7 @@ private:
 	}
 
 	unordered_multimap (unordered_multimap&& Right , const allocator_type& alloc)
-		:unordered_map_base (_STD move (Right._buckets) , _STD move (Right._hash) , _STD move (Right._eql) ,
+		:unordered_map_base (STD move (Right._buckets) , STD move (Right._hash) , STD move (Right._eql) ,
 			alloc)
 	{
 		_size = Right.size ();
@@ -922,30 +922,30 @@ private:
 		_load_factor = Right.load_factor ();
 	}
 
-	unordered_multimap(_STD initializer_list<value_type> il , size_type n , const hasher& hf = hasher() ,
+	unordered_multimap(STD initializer_list<value_type> il , size_type n , const hasher& hf = hasher() ,
 		const key_equal& eql = key_equal() , const allocator_type& alloc = allocator_type())
 		:unordered_map_base(n , hf , eql , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin(); it != il.end(); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin(); it != il.end(); ++it)
 			_insert_multiable(*it);
 	}
 
-	unordered_multimap(_STD initializer_list<value_type> il ,
+	unordered_multimap(STD initializer_list<value_type> il ,
 		size_type n ,
 		const allocator_type& alloc)
 		: unordered_map_base (n , hasher() , key_equal() , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert_multiable (*it);
 	}
 
-	unordered_multimap (_STD initializer_list<value_type> il ,
+	unordered_multimap (STD initializer_list<value_type> il ,
 		size_type n ,
 		const hasher&hf,
 		const allocator_type& alloc)
 		: unordered_map_base (n , hf , key_equal() , alloc)
 	{
-		for (_STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
+		for (STD initializer_list<value_type>::const_iterator it = il.begin (); it != il.end (); ++it)
 			_insert_multiable (*it);
 	}
 
@@ -965,10 +965,10 @@ private:
 	unordered_multimap& operator=(unordered_multimap&& Right)
 	{
 		clear ();
-		_buckets = _STD move (_Right._buckets);
-		_hash = _STD move (_Right._hash);
-		_eql = _STD move (_Right._eql);
-		_alloc = _STD move (_Right._alloc);
+		_buckets = STD move (_Right._buckets);
+		_hash = STD move (_Right._hash);
+		_eql = STD move (_Right._eql);
+		_alloc = STD move (_Right._alloc);
 		_size = _Right._size;
 		_head = _Right._head;
 		_last = _Right._last;
@@ -976,10 +976,10 @@ private:
 		return *this;
 	}
 
-	unordered_multimap& operator=(_STD initializer_list<value_type> il)
+	unordered_multimap& operator=(STD initializer_list<value_type> il)
 	{
 		clear ();
-		for (_STD initializer_list<key_type>::iterator it = il.begin (); il != il.end (); ++it)
+		for (STD initializer_list<key_type>::iterator it = il.begin (); il != il.end (); ++it)
 			_insert_multiable (*it);
 		return *this;
 	}
@@ -1106,30 +1106,30 @@ private:
 		return ret;
 	}
 
-	_STD pair<iterator , iterator> equal_range(const key_type& key)
+	STD pair<iterator , iterator> equal_range(const key_type& key)
 	{
 		iterator ret1 = find(key);
 		iterator ret2(ret1);
 		size_type num = count(key);
 		for (; num; --num)
 			++ret2;
-		return _STD make_pair(ret1 , ret2);
+		return STD make_pair(ret1 , ret2);
 	}
 
-	_STD pair<const_iterator , const_iterator> equal_range(const key_type& key) const
+	STD pair<const_iterator , const_iterator> equal_range(const key_type& key) const
 	{
 		const_iterator ret1 = find(key);
 		const_iterator ret2(ret1);
 		size_type num = count(key);
 		for (; num; --num)
 			++ret2;
-		return _STD make_pair(ret1 , ret2);
+		return STD make_pair(ret1 , ret2);
 	}
 
 	template<typename ...Args>
 	iterator emplace(Args&&...args)
 	{
-		umap_node<key_type , mapped_type> tnode(_STD forward<Args>(args)...);
+		umap_node<key_type , mapped_type> tnode(STD forward<Args>(args)...);
 		nodeptr newnode = &tnode;
 		nodeptr np = _findkey(tnode.getkey());
 		if (np == nullptr)
@@ -1153,7 +1153,7 @@ private:
 	template<typename ...Args>
 	iterator emplace_hint(const_iterator position , Args&&...args)
 	{
-		umap_node<key_type , mapped_type> tnode(_STD forward<Args>(args)...);
+		umap_node<key_type , mapped_type> tnode(STD forward<Args>(args)...);
 		nodeptr newnode = &tnode;
 		if (_eql((*position).first , tnode.getkey()))
 			_insert_after(position.np , newnode);
@@ -1183,7 +1183,7 @@ private:
 		return _insert_multiable(val);
 	}
 
-	_STD iterator insert(value_type&& val)
+	STD iterator insert(value_type&& val)
 	{
 		return _insert(val);
 	}
@@ -1213,7 +1213,7 @@ private:
 			insert(*first);
 	}
 
-	void insert(_STD initializer_list<value_type> il)
+	void insert(STD initializer_list<value_type> il)
 	{
 		insert(il.begin() , il.end());
 	}
@@ -1233,7 +1233,7 @@ private:
 		size_type ret = count(key);
 		if (ret != 0)
 		{
-			_STD pair<iterator , iterator> itp = equal_range(key);
+			STD pair<iterator , iterator> itp = equal_range(key);
 			erase(itp.first , itp.second);
 		}
 		return ret;
@@ -1246,14 +1246,14 @@ private:
 
 	void swap(unordered_multimap& Right)
 	{
-		_STD swap(_buckets , Right._buckets);
-		_STD swap(_size , Right._size);
-		_STD swap(_hash , Right._hash);
-		_STD swap(_eql , Right._eql);
-		_STD swap(_alloc , Right._alloc);
-		_STD swap(_head , Right._head);
-		_STD swap(_last , Right._last);
-		_STD swap(_load_factor , Right._load_factor);
+		STD swap(_buckets , Right._buckets);
+		STD swap(_size , Right._size);
+		STD swap(_hash , Right._hash);
+		STD swap(_eql , Right._eql);
+		STD swap(_alloc , Right._alloc);
+		STD swap(_head , Right._head);
+		STD swap(_last , Right._last);
+		STD swap(_load_factor , Right._load_factor);
 	}
 
 	size_type bucket_count() const noexcept

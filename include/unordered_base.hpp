@@ -6,7 +6,7 @@
 #include<memory>
 #include<initializer_list>
 #include<exception>
-#define _STD ::std::
+#define STD ::std::
 
 template<typename Key>
 class uset_node
@@ -40,14 +40,14 @@ class umap_node
 public:
 	using key_type = Key;
 	using mapped_type = T;
-	using value_type = _STD pair<const Key, T>;
+	using value_type = STD pair<const Key, T>;
 
 	umap_node () = delete;
 
 	umap_node(const Key& key, const T& value, umap_node* n = nullptr, umap_node* p = nullptr) :data(key, value), next(n), prev(p)
 	{   }
 
-	umap_node(const _STD pair<Key, T>& pr, umap_node* n = nullptr, umap_node* p = nullptr) :data(pr), next(n), prev(p)
+	umap_node(const STD pair<Key, T>& pr, umap_node* n = nullptr, umap_node* p = nullptr) :data(pr), next(n), prev(p)
 	{   }
 
 	const key_type& getkey() 
@@ -65,7 +65,7 @@ public:
 		return data;
 	}
 
-	_STD pair<const Key, T> data;
+	STD pair<const Key, T> data;
 	umap_node* next;
 	umap_node* prev;
 };
@@ -95,12 +95,12 @@ protected:
 		:_buckets (n > 4 ? n : 4 , nullptr) , _hash (hf) , _eql (eql) , _alloc (alloc)
 	{   }
 
-	unordered_base(_STD vector<nodeptr>&& vn,hasher&& hf,key_equal&& eql,allocator_type&& alloc)
-		:_buckets(_STD move(vn)),_hash(_STD move(hf)),_eql(_STD move(eql)),_alloc(_STD move(alloc))
+	unordered_base(STD vector<nodeptr>&& vn,hasher&& hf,key_equal&& eql,allocator_type&& alloc)
+		:_buckets(STD move(vn)),_hash(STD move(hf)),_eql(STD move(eql)),_alloc(STD move(alloc))
 	{   }
 
-	unordered_base (_STD vector<nodeptr>&& vn , hasher&& hf , key_equal&& eql ,const allocator_type& alloc)
-		:_buckets (_STD move (vn)) , _hash (_STD move (hf)) , _eql (_STD move (eql)) , _alloc (alloc)
+	unordered_base (STD vector<nodeptr>&& vn , hasher&& hf , key_equal&& eql ,const allocator_type& alloc)
+		:_buckets (STD move (vn)) , _hash (STD move (hf)) , _eql (STD move (eql)) , _alloc (alloc)
 	{   }
 
 	size_type _makehash(const key_type& key) const
@@ -118,7 +118,7 @@ protected:
 			return;
 		}
 
-		_STD vector<nodeptr> vec(_buckets);
+		STD vector<nodeptr> vec(_buckets);
 		_buckets.clear ();
 		_buckets.resize(newbc);
 		_size = 0;
@@ -291,7 +291,7 @@ protected:
 		return _alloc;
 	}
 
-	_STD vector<nodeptr> _buckets;
+	STD vector<nodeptr> _buckets;
 	size_type _size = 0;
 	Hash _hash;
 	key_equal _eql;
